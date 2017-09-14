@@ -1,0 +1,36 @@
+{
+  "name": "proyecto",
+  "version": "1.0.0",
+  "description": "\"Proyecto para la materia Base de Datos - UTN FRBA - cursada 2017 2do Cuatrimestre\"",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuillermoGaete/Proyecto-Base-de-Datos.git"
+  },
+  "keywords": [
+    "APIrest",
+    "Bases",
+    "de",
+    "datos"
+  ],
+  "author": "Isaac Guillermo Gaete",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GuillermoGaete/Proyecto-Base-de-Datos/issues"
+  },
+  "homepage": "https://github.com/GuillermoGaete/Proyecto-Base-de-Datos#readme",
+  "dependencies": {
+    "body-parser": "^1.18.1",
+    "express": "^4.15.4",
+    "mysql2": "^1.4.2",
+    "sequelize": "^4.8.3",
+    "sequelize-cli": "^3.0.0-2"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.0"
+  }
+}
