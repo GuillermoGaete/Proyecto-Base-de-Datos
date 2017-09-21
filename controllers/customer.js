@@ -1,4 +1,5 @@
 const Customer = require('../models/customer')
+const moment = require('moment')
 
 function getCustomer (req, res) {
   Customer.findById(req.params.customerID).then(customer => {
@@ -16,39 +17,55 @@ function getCustomer (req, res) {
   })
 }
 function getCustomers (req, res) {
-  res.status(200).send({
-    created: true,
-    message: 'Se cargo el usuario correctamente'
+  var limit = ((req.params.number < 100) ? req.params.number : 100)
+  Customer.findAll({limit: limit})
+  .then((customers) => {
+    if (customers.length !== 0) {
+      res.status(200).send({
+        found: true,
+        customers: customers
+      })
+    } else {
+      res.status(200).send({
+        found: false
+      })
+    }
+  })
+  .catch((err) => {
+    console.log(`Error al buscar los customers: ${err}`)
+    res.status(500).send({
+      message: 'Error al realizar la busqueda'
+    })
   })
 }
+
 function createCustomer (req, res) {
-  Customer.create({
+  const BirthdayDate = moment(req.body.BirthdayDate)
+  const customer = Customer.build({
     Name: req.body.Name,
     Surname: req.body.Surname,
     Email: req.body.Email,
     Gender: true,
-    BirthdayDate: req.body.BirthdayDate,
+    BirthdayDate: BirthdayDate,
     MobilePhone: req.body.MobilePhone
   })
-  .then(() => Customer.findOrCreate({where: {Name: req.body.Name}}))
-  .spread((user, created) => {
-    console.log(user.get({
-      plain: true
-    }))
-    console.log(created)
-    res.status(200).send({
-      created: true,
-      message: 'Se cargo el usuario correctamente'
+  customer.save()
+    .then(() => Customer.findOrCreate({where: {Name: req.body.Name}}))
+    .spread((user, created) => {
+      res.status(200).send({
+        created: true,
+        message: 'Se cargo el customer correctamente',
+        customer: customer
+      })
     })
-  })
-  .catch(err => {
-    console.error(`Error al guardar los valores: ${err}`)
-    res.status(400).send({
-      created: false,
-      message: 'Se produjo un error inesperado'
+    .catch((err) => {
+      console.error(`Error al guardar los valores: ${err}`)
+      res.status(400).send({
+        message: 'Se produjo un error inesperado'
+      })
     })
-  })
 }
+
 function updateCustomer (req, res) {
   Customer.findById(req.params.customerID).then(customer => {
     if (customer == null) {
