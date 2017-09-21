@@ -29,15 +29,11 @@ const Customer = Conection.define('Customer', {
   Gender: {
     type: Sequelize.BOOLEAN,
     allowNull: false
-  },
-  SoftDeleted: {
-    type: Sequelize.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
   }
 },
   {
-    freezeTableName: true
+    freezeTableName: true,
+    paranoid: true
   }
 )
 
