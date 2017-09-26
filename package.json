@@ -32,6 +32,7 @@
     "sequelize-cli": "^3.0.0-2"
   },
   "devDependencies": {
+    "faker": "^4.1.0",
     "nodemon": "^1.12.0"
   }
 }

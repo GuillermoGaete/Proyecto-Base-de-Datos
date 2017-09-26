@@ -17,8 +17,9 @@ function getCustomer (req, res) {
   })
 }
 function getCustomers (req, res) {
-  var limit = ((req.params.number < 100) ? req.params.number : 100)
-  Customer.findAll({limit: limit})
+  const limit = ((req.params.limit) ? req.params.limit : 100)
+  const fixedlimit = ((limit < 100) ? limit : 100)
+  Customer.findAll({limit: fixedlimit})
   .then((customers) => {
     if (customers.length !== 0) {
       res.status(200).send({
