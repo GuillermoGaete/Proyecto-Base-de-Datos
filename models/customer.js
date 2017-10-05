@@ -28,7 +28,13 @@ const Customer = Conection.define('Customer', {
   },
   Gender: {
     type: Sequelize.BOOLEAN,
-    allowNull: false
+    allowNull: false,
+    get () {
+      return (this.getDataValue('Gender') ? 'Male' : 'Female')
+    },
+    set (val) {
+      this.setDataValue('Gender', ((val === 'Male') ? 1 : 0))
+    }
   }
 },
   {

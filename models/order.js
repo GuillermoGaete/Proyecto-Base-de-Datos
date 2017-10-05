@@ -1,6 +1,7 @@
 'use strict'
 const Sequelize = require('sequelize')
 const Conection = require('../connection')
+const Customer = require('./customer')
 
 const Order = Conection.define('Order', {
   OrderID: {
@@ -26,4 +27,10 @@ const Order = Conection.define('Order', {
   }
 )
 
+Customer.hasMany(Order, {
+  foreignKey: 'CustomerID'
+})
+Order.belongsTo(Customer, {
+  foreignKey: 'CustomerID'
+})
 module.exports = Order

@@ -1,5 +1,6 @@
 const Customer = require('../models/customer')
 const moment = require('moment')
+const config = require('./config.json')
 
 function getCustomer (req, res) {
   Customer.findById(req.params.customerID).then(customer => {
@@ -17,9 +18,8 @@ function getCustomer (req, res) {
   })
 }
 function getCustomers (req, res) {
-  const limit = ((req.params.limit) ? req.params.limit : 100)
-  const fixedlimit = ((limit < 100) ? limit : 100)
-  Customer.findAll({limit: fixedlimit})
+  var limit = ((req.params.limit < config.maxLimitValue) ? req.params.limit : config.maxLimitValue)
+  Customer.findAll({limit: Number(limit)})
   .then((customers) => {
     if (customers.length !== 0) {
       res.status(200).send({
