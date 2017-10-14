@@ -11,7 +11,7 @@ conn
     console.log('Conexion a la base de datos establecida correctamente.')
     // Pongo la aplicacion a correr en el puerto que corresponde
     app.listen(config.port, () => {
-      console.log(`API REST corriendo en http://${config.host}:${config.port}`)
+      console.log(`API REST corriendo, rama master, en http://${config.host}:${config.port}`)
     })
   })
   .catch(err => {
