@@ -1,0 +1,9 @@
+Kitchen	KEYWORD2
+KitchenItem	KEYWORD1
+QuequeKitchen	KEYWORD1
+anyAvailable KEYWORD2
+isAvailable KEYWORD2
+percentFull KEYWORD2
+getMinTimeFull KEYWORD2
+getLessFullQueque KEYWORD2
+pushMenu KEYWORD2
