@@ -4,6 +4,7 @@ const express = require('express')
 const api = express.Router()
 const CustomerController = require('../controllers/customer')
 const OrderController = require('../controllers/order')
+const MenuController = require('../controllers/menu')
 const IngredientController = require('../controllers/ingredient')
 
 api.post('/customer', CustomerController.createCustomer)
@@ -25,6 +26,16 @@ api.get('/orders(/:limit)?', OrderController.getOrders)
 api.put('/order/:orderID', OrderController.updateOrder)
 
 api.delete('/order/:orderID', OrderController.deleteOrder)
+
+api.post('/menu', MenuController.createMenu)
+
+api.get('/menu/:menuID', MenuController.getMenu)
+
+api.get('/menus(/:limit)?', MenuController.getMenus)
+
+api.put('/menu/:menuID', MenuController.updateMenu)
+
+api.delete('/menu/:menuID', MenuController.deleteMenu)
 
 api.post('/ingredient', IngredientController.createIngredient)
 

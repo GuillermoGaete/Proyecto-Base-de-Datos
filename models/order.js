@@ -1,7 +1,6 @@
 'use strict'
 const Sequelize = require('sequelize')
 const Conection = require('../connection')
-const Customer = require('./customer')
 
 const Order = Conection.define('Order', {
   OrderID: {
@@ -10,6 +9,14 @@ const Order = Conection.define('Order', {
     autoIncrement: true
   },
   deliberedAt: {
+    allowNull: true,
+    type: Sequelize.DATE
+  },
+  sendToKitchenAt: {
+    allowNull: true,
+    type: Sequelize.DATE
+  },
+  ackFromKitchenAt: {
     allowNull: true,
     type: Sequelize.DATE
   },
@@ -27,10 +34,4 @@ const Order = Conection.define('Order', {
   }
 )
 
-Customer.hasMany(Order, {
-  foreignKey: 'CustomerID'
-})
-Order.belongsTo(Customer, {
-  foreignKey: 'CustomerID'
-})
 module.exports = Order

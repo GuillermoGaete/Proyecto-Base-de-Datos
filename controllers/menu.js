@@ -1,52 +1,52 @@
-const Order = require('../models/order')
-const Customer = require('../models/customer')
 const Menu = require('../models/menu')
+const Customer = require('../models/customer')
+const Order = require('../models/order')
 const config = require('./config.json')
-const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePhone', 'Gender']
-const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt', 'sendToKitchenAt', 'ackFromKitchenAt']
+const OrderAttributes = ['OrderID', 'CustomerID']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ShorDescription', 'Price', 'DiscountPercentage']
 
-function getOrder (req, res) {
-  Order.findById(req.params.orderID, {
+function getMenu (req, res) {
+  Menu.findById(req.params.menuID, {
     include: [
       {
-        model: Menu,
-        as: 'Menues',
-        attributes: MenuAttributes
+        model: Order,
+        as: 'inOrders',
+        attributes: OrderAttributes
       }
     ],
-    attributes: OrderAttributes
-  }).then(Order => {
-    if (Order == null) {
+    attributes: MenuAttributes
+  }).then(Menu => {
+    if (Menu == null) {
       res.status(404).send({
         found: false,
-        message: `No se encontro un Order con ID ${req.params.orderID}`
+        message: `No se encontro un Menu con ID ${req.params.menuID}`
       })
     } else {
       res.status(200).send({
         found: true,
-        Order: Order
+        Menu: Menu
       })
     }
   })
 }
-function getOrders (req, res) {
+function getMenus (req, res) {
   var limit = ((req.params.limit < config.maxLimitValue) ? req.params.limit : config.maxLimitValue)
-  Order.findAll({
+  Menu.findAll({
     limit: Number(limit),
+    attributes: MenuAttributes,
     include: [
       {
-        model: Customer,
-        attributes: CustomerAttributes
+        model: Order,
+        as: 'inOrders',
+        attributes: OrderAttributes
       }
-    ],
-    attributes: OrderAttributes
+    ]
   })
-  .then((Orders) => {
-    if (Orders.length !== 0) {
+  .then((Menus) => {
+    if (Menus.length !== 0) {
       res.status(200).send({
         found: true,
-        Orders: Orders
+        Menus: Menus
       })
     } else {
       res.status(200).send({
@@ -55,27 +55,27 @@ function getOrders (req, res) {
     }
   })
   .catch((err) => {
-    console.log(`Error al buscar las ordenes: ${err}`)
+    console.log(`Error al buscar los menus: ${err}`)
     res.status(500).send({
       message: 'Error al realizar la busqueda'
     })
   })
 }
 
-function createOrder (req, res) {
-  const order = Order.build({
+function createMenu (req, res) {
+  const order = Menu.build({
     CustomerID: config.env === 'development' ? 3 : req.body.CustomerID
   })
   order.save()
-    .then(() => Order.findOrCreate({
-      where: {OrderID: order.OrderID},
+    .then(() => Menu.findOrCreate({
+      where: {MenuID: order.MenuID},
       include: [
         {
           model: Customer,
           attributes: CustomerAttributes
         }
       ],
-      attributes: OrderAttributes
+      attributes: MenuAttributes
     }))
     .spread((orderCreated, created) => {
       res.status(200).send({
@@ -92,22 +92,22 @@ function createOrder (req, res) {
     })
 }
 
-function updateOrder (req, res) {
-  Order.findById(req.params.orderID).then(Order => {
-    if (Order == null) {
+function updateMenu (req, res) {
+  Menu.findById(req.params.orderID).then(Menu => {
+    if (Menu == null) {
       res.status(404).send({
         found: false,
         message: `No se encontro una ordern con ID ${req.params.orderID}`
       })
     } else {
-      Order.update({
-        deliberedAt: ((req.body.deliberedAt) ? req.body.deliberedAt : Order.deliberedAt),
-        CustomerID: ((req.body.CustomerID) ? req.body.CustomerID : Order.CustomerID)
+      Menu.update({
+        deliberedAt: ((req.body.deliberedAt) ? req.body.deliberedAt : Menu.deliberedAt),
+        CustomerID: ((req.body.CustomerID) ? req.body.CustomerID : Menu.CustomerID)
       }).then(() => {
         res.status(200).send({
           found: true,
           updated: true,
-          Order: Order.dataValues
+          Menu: Menu.dataValues
         })
       })
       .catch((err) => {
@@ -115,21 +115,21 @@ function updateOrder (req, res) {
         res.status(500).send({
           found: true,
           updated: false,
-          message: `Error interno al guardar el Order`
+          message: `Error interno al guardar el Menu`
         })
       })
     }
   })
 }
-function deleteOrder (req, res) {
-  Order.findById(req.params.orderID).then(Order => {
-    if (Order == null) {
+function deleteMenu (req, res) {
+  Menu.findById(req.params.menuID).then(Menu => {
+    if (Menu == null) {
       res.status(404).send({
         found: false,
-        message: `No se encontro una orden con ID ${req.params.orderID}`
+        message: `No se encontro una menu con ID ${req.params.menuID}`
       })
     } else {
-      Order.destroy()
+      Menu.destroy()
       .then(() => {
         res.status(200).send({
           found: true,
@@ -141,7 +141,7 @@ function deleteOrder (req, res) {
         res.status(500).send({
           found: true,
           destroyed: false,
-          message: `Error interno al eliminar la orden`
+          message: `Error interno al eliminar el menu`
         })
       })
     }
@@ -149,9 +149,9 @@ function deleteOrder (req, res) {
 }
 
 module.exports = {
-  updateOrder,
-  getOrder,
-  getOrders,
-  deleteOrder,
-  createOrder
+  updateMenu,
+  getMenu,
+  getMenus,
+  deleteMenu,
+  createMenu
 }

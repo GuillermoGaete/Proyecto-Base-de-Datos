@@ -11,5 +11,28 @@ const conn = new Sequelize(config.database, config.username, config.password, {
     idle: 10000
   }
 })
-
 module.exports = conn
+
+const Order = require('./models/order')
+const Menu = require('./models/menu')
+const OrderMenu = require('./models/orderMenu')
+const Ingredient = require('./models/ingredient')
+const MenuIngredient = require('./models/menuIngredient')
+const Customer = require('./models/customer')
+
+Order.belongsToMany(Menu, {
+  as: 'Menues',
+  through: OrderMenu,
+  foreignKey: 'OrderID'
+})
+Menu.belongsToMany(Order, {
+  as: 'inOrders',
+  through: OrderMenu,
+  foreignKey: 'MenuID'
+})
+
+Menu.belongsToMany(Ingredient, { as: 'Ingredients', through: MenuIngredient })
+Ingredient.belongsToMany(Menu, { as: 'inMenues', through: MenuIngredient })
+
+Order.belongsTo(Customer, { foreignKey: 'CustomerID' })
+Customer.hasMany(Order, { foreignKey: 'CustomerID' })

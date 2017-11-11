@@ -47,12 +47,5 @@ const Ingredient = Conection.define('Ingredient', {
   }
 )
 
-Ingredient.belongsTo(MeasureUnit, {
-  foreignKey: 'MeasureUnitID'
-})
-
-Ingredient.belongsTo(CategoryIngredient, {
-  foreignKey: 'CategoryID'
-})
 
 module.exports = Ingredient

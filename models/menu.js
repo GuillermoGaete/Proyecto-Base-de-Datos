@@ -1,8 +1,10 @@
 'use strict'
 const Sequelize = require('sequelize')
 const Conection = require('../connection')
+const CategoryMenu = require('./categoryMenu.js')
+const Order = require('./order')
 
-const Menu = Conection.define('MEnu', {
+const Menu = Conection.define('Menu', {
   MenuID: {
     type: Sequelize.INTEGER,
     primaryKey: true,
@@ -49,5 +51,13 @@ const Menu = Conection.define('MEnu', {
     paranoid: true
   }
 )
+
+Menu.belongsToMany(Order, {
+  through: 'OrderMenu'
+})
+
+Menu.belongsTo(CategoryMenu, {
+  foreignKey: 'CategoryID'
+})
 
 module.exports = Menu

@@ -1,6 +1,6 @@
 'use strict'
 const Sequelize = require('sequelize')
-const Conection = require('../../connection')
+const Conection = require('../connection')
 
 const CategoryMenu = Conection.define('CategoryMenu', {
   CategoryID: {
@@ -11,6 +11,11 @@ const CategoryMenu = Conection.define('CategoryMenu', {
   Name: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  deletedAt: {
+    type: Sequelize.DATE,
+    allowNull: true,
+    defaultValue: null
   }
 },
   {

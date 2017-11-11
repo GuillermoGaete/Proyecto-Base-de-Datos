@@ -1,3 +1,4 @@
 {
-  "maxLimitValue":100
+  "maxLimitValue":100,
+  "env":"development"
 }

@@ -1,7 +1,7 @@
 const Ingredient = require('../models/ingredient')
 const config = require('./config.json')
-const MeasureUnit = require('../models/measureUnit')
-const CategoryIngredient = require('../models/categoryIngredient')
+const MeasureUnit = require('../models/measureUnit.js')
+const CategoryIngredient = require('../models/categoryIngredient.js')
 
 function getIngredient (req, res) {
   Ingredient.findById(req.params.ingredientID, {
