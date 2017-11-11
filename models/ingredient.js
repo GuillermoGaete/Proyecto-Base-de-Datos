@@ -1,8 +1,6 @@
 'use strict'
 const Sequelize = require('sequelize')
 const Conection = require('../connection')
-const MeasureUnit = require('./measureUnit')
-const CategoryIngredient = require('./categoryIngredient')
 
 const Ingredient = Conection.define('Ingredient', {
   IngredientID: {
@@ -46,6 +44,5 @@ const Ingredient = Conection.define('Ingredient', {
     paranoid: true
   }
 )
-
 
 module.exports = Ingredient
