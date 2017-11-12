@@ -28,9 +28,17 @@ const OrderMenu = Conection.define('OrderMenu', {
     onDelete: 'cascade',
     allowNull: false
   },
-  Amount: {
-    type: Sequelize.INTEGER,
-    allowNull: false
+  ackFromKitchenAt: {
+    type: Sequelize.DATE,
+    allowNull: true
+  },
+  sendToKitchenAt: {
+    type: Sequelize.DATE,
+    allowNull: true
+  },
+  finishedAt: {
+    type: Sequelize.DATE,
+    allowNull: true
   }
 }, {
   freezeTableName: true,
