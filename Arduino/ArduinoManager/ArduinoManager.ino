@@ -20,15 +20,6 @@ void setup() {
   bool inserted=kit.pushMenu(0,&item);
   item={43,6,22,0};
   inserted=kit.pushMenu(1,&item);
-  item={3,4,22,0};
-  inserted=kit.pushMenu(0,&item);
-  item={4,7,23,0};
-  inserted=kit.pushMenu(3,&item);
-  item={4,7,12,0};
-  inserted=kit.pushMenu(3,&item);
-  item={4,7,12,0};
-  inserted=kit.pushMenu(2,&item);
-  item={4,7,12,0};
 }
 
 
@@ -72,7 +63,7 @@ void loop() {
     if(anyToRemove){
        KitchenItem Removed=kit.getRemoved();
        sendRemoved(Removed.idQueque,Removed.idOrder);
-     } 
+     }
     localCounter++;
     }
 }
