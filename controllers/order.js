@@ -3,7 +3,7 @@ const Customer = require('../models/customer')
 const Menu = require('../models/menu')
 const config = require('./config.json')
 const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePhone', 'Gender']
-const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt', 'sendToKitchenAt', 'ackFromKitchenAt']
+const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ShorDescription', 'Price', 'DiscountPercentage']
 
 function getOrder (req, res) {
