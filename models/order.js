@@ -12,6 +12,10 @@ const Order = Conection.define('Order', {
     allowNull: true,
     type: Sequelize.DATE
   },
+  requiredAt: {
+    allowNull: true,
+    type: Sequelize.DATE
+  },
   CustomerID: {
     type: Sequelize.INTEGER,
     references: {

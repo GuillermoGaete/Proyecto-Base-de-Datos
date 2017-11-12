@@ -3,8 +3,9 @@ const Customer = require('../models/customer')
 const Menu = require('../models/menu')
 const config = require('./config.json')
 const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePhone', 'Gender']
-const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt']
-const MenuAttributes = ['MenuID', 'Name', 'Description', 'ShorDescription', 'Price', 'DiscountPercentage']
+const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt', 'requiredAt']
+const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', 'ShorDescription', 'Price', 'DiscountPercentage']
+const ServiceArduino = require('../service/arduinoConectorClient')
 
 function getOrder (req, res) {
   Order.findById(req.params.orderID, {
@@ -64,32 +65,50 @@ function getOrders (req, res) {
 
 function createOrder (req, res) {
   const order = Order.build({
-    CustomerID: config.env === 'development' ? 3 : req.body.CustomerID
+    CustomerID: req.body.CustomerID ? req.body.CustomerID : 3
   })
   order.save()
-    .then(() => Order.findOrCreate({
-      where: {OrderID: order.OrderID},
-      include: [
-        {
-          model: Customer,
-          attributes: CustomerAttributes
-        }
-      ],
-      attributes: OrderAttributes
-    }))
-    .spread((orderCreated, created) => {
-      res.status(200).send({
-        created: true,
-        message: 'Se cargo la orden correctamente',
-        order: orderCreated
-      })
-    })
-    .catch((err) => {
-      console.error(`Error al guardar los valores: ${err}`)
-      res.status(400).send({
-        message: 'Se produjo un error inesperado'
-      })
-    })
+        .then(() => {
+          Menu.findAll({ where: { MenuID: req.body.MenuesID } }).then(menus => {
+            order.addMenues(menus).then(() => {
+              ServiceArduino.insertOrder(order).then((response) => {
+                Order.findOrCreate({
+                  where: {OrderID: order.OrderID},
+                  include: [
+                    {
+                      model: Customer,
+                      attributes: CustomerAttributes
+                    },
+                    {
+                      model: Menu,
+                      as: 'Menues',
+                      attributes: MenuAttributes
+                    }
+                  ],
+                  attributes: OrderAttributes
+                }).spread((orderCreated, created) => {
+                  res.status(200).send({
+                    created: true,
+                    message: 'Se cargo la orden correctamente',
+                    order: orderCreated
+                  })
+                })
+                .catch((err) => {
+                  console.error(`Error al guardar los valores: ${err}`)
+                  res.status(400).send({
+                    message: 'Se produjo un error inesperado'
+                  })
+                })
+              })
+              .catch((err) => {
+                console.error(`Error al utilizar insert en arduino: ${err}`)
+              })
+            })
+            .catch((err) => {
+              console.error(`Error al agregar menues: ${err}`)
+            })
+          })
+        })
 }
 
 function updateOrder (req, res) {
