@@ -12,14 +12,6 @@ const Order = Conection.define('Order', {
     allowNull: true,
     type: Sequelize.DATE
   },
-  sendToKitchenAt: {
-    allowNull: true,
-    type: Sequelize.DATE
-  },
-  ackFromKitchenAt: {
-    allowNull: true,
-    type: Sequelize.DATE
-  },
   CustomerID: {
     type: Sequelize.INTEGER,
     references: {
