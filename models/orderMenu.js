@@ -29,15 +29,15 @@ const OrderMenu = Conection.define('OrderMenu', {
     allowNull: false
   },
   ackFromKitchenAt: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATE(3),
     allowNull: true
   },
   sendToKitchenAt: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATE(3),
     allowNull: true
   },
   finishedAt: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATE(3),
     allowNull: true
   },
   cookTime: {
