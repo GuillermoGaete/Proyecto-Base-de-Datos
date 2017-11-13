@@ -9,7 +9,8 @@ const conn = new Sequelize(config.database, config.username, config.password, {
     max: 5,
     min: 0,
     idle: 10000
-  }
+  },
+  logging: false
 })
 module.exports = conn
 

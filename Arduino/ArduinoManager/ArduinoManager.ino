@@ -35,14 +35,14 @@ void processAction(String recived){
     break;
     case INSERT_ORDER:
     {
-    int insertResult=insertOrder(jsonRecived["idOrder"],jsonRecived["elTime"]);
-    sendInserted(jsonRecived["idOrder"],insertResult);
+    int insertResult=insertOrder(jsonRecived["idOrder"],jsonRecived["elTime"],jsonRecived["idMenu"]);
+    sendInserted(jsonRecived["idOrder"],insertResult,jsonRecived["idMenu"]);
     }
     break;
   }
 }
-int insertOrder(int order,int elTime){
-  KitchenItem item={order,elTime,22,0};
+int insertOrder(int order,int elTime,int menu){
+  KitchenItem item={order,elTime,menu,0};
   int queque=kit.getLessFullQueque();
   int inserted=kit.pushMenu(queque,&item);  
   return inserted;
@@ -62,7 +62,7 @@ void loop() {
     bool anyToRemove=kit.anyRemoved();
     if(anyToRemove){
        KitchenItem Removed=kit.getRemoved();
-       sendRemoved(Removed.idQueque,Removed.idOrder);
+       sendRemoved(Removed.idQueque,Removed.idOrder,Removed.idMenu);
      }
     localCounter++;
     }
@@ -84,7 +84,7 @@ void echo(String recived){
   }
 }
 
-void sendInserted(int order,int insertResult){
+void sendInserted(int order,int insertResult,int menu){
   StaticJsonBuffer<512> jsonBuffer;
   JsonObject& senderJsonInserted = jsonBuffer.parseObject("{}");
   senderJsonInserted["action"]="order_inserted";
@@ -95,12 +95,13 @@ void sendInserted(int order,int insertResult){
      senderJsonInserted["state"]="fail";
      senderJsonInserted["reason"]=insertResult;
   }
-  senderJsonInserted["order"]=order;  
+  senderJsonInserted["order"]=order;
+  senderJsonInserted["menu"]=menu;    
   if(Serial.availableForWrite()>0){
     senderJsonInserted.printTo(Serial);  
     return;
   }else{
-    sendInserted(order,insertResult);
+    sendInserted(order,insertResult,menu);
     return;
   } 
 }
@@ -137,17 +138,18 @@ void sendInfo(int queque){
     return;
   }
 }
-void sendRemoved(int queque, int order){
+void sendRemoved(int queque, int order,int menu){
   StaticJsonBuffer<512> jsonBuffer;
   JsonObject& senderJsonRemove = jsonBuffer.parseObject("{}");
   senderJsonRemove["action"]="finish_order";
   senderJsonRemove["queque"]=queque;
   senderJsonRemove["order"]=order;
+  senderJsonRemove["menu"]=menu;
   if(Serial.availableForWrite()>0){
     senderJsonRemove.printTo(Serial);  
     return;
   }else{
-    sendRemoved(queque,order);
+    sendRemoved(queque,order,menu);
     return;
   } 
 }
