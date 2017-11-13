@@ -51,14 +51,31 @@ SerialPort.list(function (err, ports) {
       parser.on('data', function (data) {
         var fixedData = Buffer.concat([ data, Buffer.from('}') ])
         try {
+          var options = { }
           var jsonData = JSON.parse(fixedData.toString())
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'finish_order') {
             console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
+            options = {
+              method: 'PUT',
+              uri: 'http://localhost:3000/api/order-menu/finished',
+              body: {
+                Menu: jsonData.menu,
+                Order: jsonData.order
+              },
+              json: true // Automatically stringifies the body to JSON
+            }
+            rp(options)
+            .then(function (parsedBody) {
+              console.log(`Respuesta satisfactoria desde el server`)
+            })
+            .catch((err) => {
+              console.log(`Error al informar que la orden finalizo correctamente - Error:${err}`)
+            })
           }
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
             console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
-            var options = {
-              method: 'POST',
+            options = {
+              method: 'PUT',
               uri: 'http://localhost:3000/api/order-menu/ack',
               body: {
                 Menu: jsonData.menu,

@@ -16,10 +16,6 @@ void setup() {
     // wait serial port initialization
   }
   Timer1.attachInterrupt(handlerTick).setFrequency(1).start();
-  KitchenItem item={55,5,22,0};
-  bool inserted=kit.pushMenu(0,&item);
-  item={43,6,22,0};
-  inserted=kit.pushMenu(1,&item);
 }
 
 
@@ -64,15 +60,6 @@ void loop() {
        KitchenItem Removed=kit.getRemoved();
        sendRemoved(Removed.idQueque,Removed.idOrder,Removed.idMenu);
      }
-    sendInfo(0);
-    sendInfo(1);
-    sendInfo(2);
-    sendInfo(3);
-    sendInfo(4);
-    sendInfo(5);
-    sendInfo(6);
-    sendInfo(7);
-    sendInfo(8);
     localCounter++;
     }
 }
