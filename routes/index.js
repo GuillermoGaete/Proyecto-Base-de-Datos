@@ -27,6 +27,8 @@ api.put('/order/:orderID', OrderController.updateOrder)
 
 api.delete('/order/:orderID', OrderController.deleteOrder)
 
+api.post('/order/ack', OrderController.ackOrder)
+
 api.post('/menu', MenuController.createMenu)
 
 api.get('/menu/:menuID', MenuController.getMenu)

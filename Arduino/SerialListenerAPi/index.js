@@ -10,6 +10,7 @@ const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 })
+const rp = require('request-promise')
 
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -53,8 +54,21 @@ SerialPort.list(function (err, ports) {
           var jsonData = JSON.parse(fixedData.toString())
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'finish_order') {
             console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
-          } else {
-            console.log(jsonData)
+          }
+          if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
+            var options = {
+              method: 'POST',
+              uri: 'http://localhost:3000/order/ack',
+              body: {
+                Menu: jsonData.menu,
+                Order: jsonData.order
+              },
+              json: true // Automatically stringifies the body to JSON
+            }
+            rp(options)
+            .then(function (parsedBody) {
+              console.log('enviado')
+            })
           }
         } catch (e) {
           console.log(e)

@@ -1,4 +1,5 @@
 const Order = require('../models/order')
+const OrderMenu = require('../models/orderMenu')
 const Customer = require('../models/customer')
 const Menu = require('../models/menu')
 const config = require('./config.json')
@@ -140,6 +141,36 @@ function updateOrder (req, res) {
     }
   })
 }
+
+function ackOrder (req, res) {
+  OrderMenu.findAll({ where: { OrderID: req.body.Order, MenuID: req.body.MEnu } }).then(Order => {
+    if (Order[0] == null) {
+      res.status(404).send({
+        found: false,
+        message: `No se encontro una con ID ${req.body.Order}`
+      })
+    } else {
+      Order[0].update({
+        ackFromKitchenAt: ((req.body.deliberedAt) ? req.body.deliberedAt : Order.deliberedAt)
+      }).then(() => {
+        console.log("ack recibido")
+        res.status(200).send({
+          found: true,
+          updated: true
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+        res.status(500).send({
+          found: true,
+          updated: false,
+          message: `Error interno al guardar el Order`
+        })
+      })
+    }
+  })
+}
+
 function deleteOrder (req, res) {
   Order.findById(req.params.orderID).then(Order => {
     if (Order == null) {
@@ -172,5 +203,6 @@ module.exports = {
   getOrder,
   getOrders,
   deleteOrder,
-  createOrder
+  createOrder,
+  ackOrder
 }

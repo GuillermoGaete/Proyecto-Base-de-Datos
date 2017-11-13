@@ -64,6 +64,15 @@ void loop() {
        KitchenItem Removed=kit.getRemoved();
        sendRemoved(Removed.idQueque,Removed.idOrder,Removed.idMenu);
      }
+    sendInfo(0);
+    sendInfo(1);
+    sendInfo(2);
+    sendInfo(3);
+    sendInfo(4);
+    sendInfo(5);
+    sendInfo(6);
+    sendInfo(7);
+    sendInfo(8);
     localCounter++;
     }
 }
