@@ -43,11 +43,14 @@ const OrderMenu = Conection.define('OrderMenu', {
   cookTime: {
     type: Sequelize.VIRTUAL,
     get: function () {
-      if (this.get('finishedAt') == null) {
-        return null
-      }
       var finishDate = moment(this.get('finishedAt'))
       var sendDate = moment(this.get('sendToKitchenAt'))
+      if (finishDate == null) {
+        return null
+      }
+      if (sendDate == null) {
+        return null
+      }
       return finishDate.diff(sendDate, 'seconds')
     }
   }
