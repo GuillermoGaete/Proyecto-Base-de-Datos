@@ -56,9 +56,10 @@ SerialPort.list(function (err, ports) {
             console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
           }
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
+            console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
             var options = {
               method: 'POST',
-              uri: 'http://localhost:3000/order/ack',
+              uri: 'http://localhost:3000/api/order-menu/ack',
               body: {
                 Menu: jsonData.menu,
                 Order: jsonData.order
@@ -67,7 +68,10 @@ SerialPort.list(function (err, ports) {
             }
             rp(options)
             .then(function (parsedBody) {
-              console.log('enviado')
+              console.log(`Respuesta satisfactoria desde el server`)
+            })
+            .catch((err) => {
+              console.log(`Error al informar que la orden se inserto correctamente - Error:${err}`)
             })
           }
         } catch (e) {
