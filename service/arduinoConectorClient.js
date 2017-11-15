@@ -1,6 +1,7 @@
 const rp = require('request-promise')
 const sequelize = require('sequelize')
 const OrderMenu = require('../models/orderMenu')
+const logger = require('../helpers/logger')
 
 function insertOrder (order) {
   var MenuesPromise = order.getMenues()
@@ -22,18 +23,18 @@ function insertOrder (order) {
           ordermenu[0].update({
             sendToKitchenAt: sequelize.fn('NOW')
           }).then((orderup) => {
-            console.log(`Orden:${order.OrderID} - Menu: ${Menu.MenuID} - seended to kitchen correctly.`)
+            logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', `Orden:${order.OrderID} - Menu: ${Menu.MenuID} - seended to kitchen correctly.`)
           })
           .catch((err) => {
-            console.log(`Error al seteat el timestamp de envio a Arduino:${err}`)
+            logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', `Error al seteat el timestamp de envio a Arduino:${err}`)
           })
         })
         .catch((err) => {
-          console.log('Error al buscar las odernes y menues insertados: ' + err.message)
+          logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', 'Error al buscar las odernes y menues insertados: ' + err.message)
         })
       })
       .catch(function (err) {
-        console.log('Error al enviar la orden al sistema de preparacion: ' + err.message)
+        logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', 'Error al enviar la orden al sistema de preparacion: ' + err.message)
       })
     })
   })

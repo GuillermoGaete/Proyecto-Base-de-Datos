@@ -5,6 +5,7 @@ const config = require('./config.json')
 const OrderAttributes = ['OrderID', 'CustomerID']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', 'ShorDescription', 'Price', 'DiscountPercentage']
 const CustomerAttributes = ['CustomerID', 'Name', 'Email']
+const colors = require('colors')
 
 function getMenu (req, res) {
   Menu.findById(req.params.menuID, {

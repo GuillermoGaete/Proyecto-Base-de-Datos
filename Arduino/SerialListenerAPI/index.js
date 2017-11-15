@@ -6,6 +6,8 @@ const config = require('../../config/app/config.json')[env]
 const SerialPort = require('serialport')
 const Delimiter = SerialPort.parsers.Delimiter
 const readline = require('readline')
+const logger = require('./logger')
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -19,17 +21,17 @@ SerialPort.list(function (err, ports) {
   if (err) {
     console.log(`Se pprodujo un error ${err}`)
   }
-  console.log('Puertos disponibles:')
+  logger.log(logger.GREEN, 'INIT', 'Puertos disponibles:')
   ports.forEach(function (port, index) {
     if (port.vendorId) {
-      console.log(`#${index + 1} |Puerto:${port.comName} |pnpId: ${port.pnpId} |vendorId:${port.vendorId}`)
+      logger.log(logger.GREEN, 'INIT', `#${index + 1} |Puerto:${port.comName} |pnpId: ${port.pnpId} |vendorId:${port.vendorId}`)
     }
   })
   rl.question('Seleccione el numero de puerto: ', (answer) => {
     app.listen(config.portArduinoAPI, () => {
-      console.log(`API interna Arduino corriendo en http://${config.host}:${config.portArduinoAPI}`)
+      logger.log(logger.GREEN, 'SERVER', `API interna Arduino corriendo en http://${config.host}:${config.portArduinoAPI}`)
       var port = new SerialPort(ports[answer - 1].comName)
-      console.log(`Conectado a Arduino via: ${ports[answer - 1].comName}...`)
+      logger.log(logger.GREEN, 'SERVER', `Conectado a Arduino via: ${ports[answer - 1].comName}...`)
       const parser = port.pipe(new Delimiter({ delimiter: Buffer.from('}') }))
 
       app.post('/insertOrder', (req, res) => {
@@ -54,7 +56,7 @@ SerialPort.list(function (err, ports) {
           var options = { }
           var jsonData = JSON.parse(fixedData.toString())
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'finish_order') {
-            console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
+            logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
             options = {
               method: 'PUT',
               uri: 'http://localhost:3000/api/order-menu/finished',
@@ -66,14 +68,14 @@ SerialPort.list(function (err, ports) {
             }
             rp(options)
             .then(function (parsedBody) {
-              console.log(`Respuesta satisfactoria desde el server`)
+              logger.log(logger.GREEN, 'INFO', `Finalizacion informada al servidor correctamente`)
             })
             .catch((err) => {
-              console.log(`Error al informar que la orden finalizo correctamente - Error:${err}`)
+              logger.log(logger.RED, 'ERROR', `Error al informar que la orden finalizo correctamente - Error:${err}`)
             })
           }
           if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
-            console.log(' action: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
+            logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
             options = {
               method: 'PUT',
               uri: 'http://localhost:3000/api/order-menu/ack',
@@ -85,10 +87,10 @@ SerialPort.list(function (err, ports) {
             }
             rp(options)
             .then(function (parsedBody) {
-              console.log(`Respuesta satisfactoria desde el server`)
+              logger.log(logger.GREEN, 'INFO', `Insercion informada al servidor correctamente`)
             })
             .catch((err) => {
-              console.log(`Error al informar que la orden se inserto correctamente - Error:${err}`)
+              logger.log(logger.RED, 'ERROR', `Error al informar que la orden se inserto correctamente - Error:${err}`)
             })
           }
         } catch (e) {

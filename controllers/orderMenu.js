@@ -1,5 +1,6 @@
 const OrderMenu = require('../models/orderMenu')
 const sequelize = require('sequelize')
+const logger = require('../helpers/logger')
 
 function ackOrder (req, res) {
   OrderMenu.findAll({ where: { OrderID: req.body.Order, MenuID: req.body.Menu } }).then(Order => {
@@ -16,7 +17,7 @@ function ackOrder (req, res) {
           found: true,
           updated: true
         })
-        console.log(`Order updated! Ack recived from Kitchen - Order:${req.body.Order} - Menu:${req.body.Menu}`)
+        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `Order updated! Ack recived from Kitchen - Order:${req.body.Order} - Menu:${req.body.Menu}`)
       })
       .catch((err) => {
         console.log(err)
@@ -45,7 +46,7 @@ function finishedOrder (req, res) {
           found: true,
           updated: true
         })
-        console.log(`Order updated! finished Order from Kitchen - Order:${req.body.Order} - Menu:${req.body.Menu}`)
+        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `Order updated! finished Order from Kitchen - Order:${req.body.Order} - Menu:${req.body.Menu}`)
       })
       .catch((err) => {
         console.log(err)

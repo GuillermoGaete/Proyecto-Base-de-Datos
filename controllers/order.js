@@ -7,6 +7,7 @@ const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePho
 const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt', 'requiredAt']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', 'ShorDescription', 'Price', 'DiscountPercentage']
 const ServiceArduino = require('../service/arduinoConectorClient')
+const logger = require('../helpers/logger')
 
 function getOrder (req, res) {
   Order.findById(req.params.orderID, {
