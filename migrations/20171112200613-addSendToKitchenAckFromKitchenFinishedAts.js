@@ -7,7 +7,7 @@ module.exports = {
         'OrderMenu',
         'sendToKitchenAt',
         {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: true
         }
       ),
@@ -15,7 +15,7 @@ module.exports = {
         'OrderMenu',
         'ackFromKitchenAt',
         {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: true
         }
       ),
@@ -23,7 +23,7 @@ module.exports = {
         'OrderMenu',
         'finishedAt',
         {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: true
         }
       )

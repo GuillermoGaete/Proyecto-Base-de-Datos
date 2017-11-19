@@ -9,10 +9,10 @@ const logger = require('./helpers/logger')
 conn
   .authenticate()
   .then(() => {
-    console.log('Conexion a la base de datos establecida correctamente.')
+    logger.log(logger.GREEN, 'SERVER', `Conexion a la base de datos establecida correctamente`)
     // Pongo la aplicacion a correr en el puerto que corresponde
     app.listen(config.port, () => {
-      logger.log(logger.GREEN, 'SERVER', `API REST corriendo, rama master, en http://${config.host}:${config.port}`)
+      logger.log(logger.GREEN, 'SERVER', `API REST corriendo en http://${config.host}:${config.port}`)
     })
   })
   .catch(err => {

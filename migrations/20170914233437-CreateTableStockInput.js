@@ -11,11 +11,11 @@ module.exports = {
         },
         Amount: {
           type: Sequelize.INTEGER,
-          allowNull: false,
+          allowNull: false
         },
         boughtAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         },
         IngredientID: {
           type: Sequelize.INTEGER,
@@ -28,17 +28,17 @@ module.exports = {
           allowNull: false
         },
         deletedAt: {
-          type: Sequelize.DATE,
-          allowNull:true,
+          type: Sequelize.DATE(3),
+          allowNull: true,
           defaultValue: null
         },
         createdAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         },
         updatedAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         }
       }
     )

@@ -17,7 +17,7 @@ module.exports = {
           },
           onUpdate: 'cascade',
           onDelete: 'cascade',
-          allowNull: false,
+          allowNull: false
         },
         MenuID: {
           type: Sequelize.INTEGER,
@@ -27,24 +27,20 @@ module.exports = {
           },
           onUpdate: 'cascade',
           onDelete: 'cascade',
-          allowNull: false,
-        },
-        Amount: {
-          type: Sequelize.INTEGER,
           allowNull: false
         },
         deletedAt: {
           type: Sequelize.DATE(3),
-          allowNull:true,
+          allowNull: true,
           defaultValue: null
         },
         createdAt: {
           type: Sequelize.DATE(3),
-          allowNull: false,
+          allowNull: false
         },
         updatedAt: {
           type: Sequelize.DATE(3),
-          allowNull: false,
+          allowNull: false
         }
       }
     )

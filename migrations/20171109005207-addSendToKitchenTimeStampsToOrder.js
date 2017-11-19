@@ -3,7 +3,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.addColumn('Order', 'sendToKitchenAt', {
       allowNull: true,
-      type: Sequelize.DATE
+      type: Sequelize.DATE(3)
     })
   },
 

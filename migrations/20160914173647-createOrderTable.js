@@ -11,7 +11,7 @@ module.exports = {
         },
         deliberedAt: {
           allowNull: true,
-          type: Sequelize.DATE
+          type: Sequelize.DATE(3)
         },
         CustomerID: {
           type: Sequelize.INTEGER,
@@ -24,16 +24,16 @@ module.exports = {
           allowNull: false
         },
         deletedAt: {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: true,
           defaultValue: null
         },
         createdAt: {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: false
         },
         updatedAt: {
-          type: Sequelize.DATE,
+          type: Sequelize.DATE(3),
           allowNull: false
         }
       }

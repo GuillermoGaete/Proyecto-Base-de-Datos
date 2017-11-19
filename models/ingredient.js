@@ -33,7 +33,7 @@ const Ingredient = Conection.define('Ingredient', {
     allowNull: false
   },
   deletedAt: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATE(3),
     allowNull: true,
     defaultValue: null
   }

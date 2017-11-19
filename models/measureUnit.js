@@ -25,7 +25,7 @@ const MeasureUnit = Conection.define('MeasureUnit', {
     defaultValue: null
   },
   deletedAt: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATE(3),
     allowNull: true,
     defaultValue: null
   }

@@ -45,8 +45,11 @@ SerialPort.list(function (err, ports) {
             console.log('Response received after sending message : ' + result)
           }
         })
+        // TODO tiene problemas para manejar muchas ordenes, la solucion es ponerla en una fila y retirarla al recibir la confirmacion desde Arduino.
+        // en esta ruta solo informar la recepcion por parte del servidor
+        // corregir lo que esta haciendo arduinoConectorClient que no esta bien tampoco
         res.status(200).send({
-          found: true
+          recived: true
         })
       })
 

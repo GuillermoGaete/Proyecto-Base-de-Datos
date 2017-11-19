@@ -5,7 +5,7 @@ module.exports = {
     queryInterface.createTable(
       'Menu',
       {
-        MenuID : {
+        MenuID: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
@@ -27,7 +27,7 @@ module.exports = {
           allowNull: false
         },
         DiscountPercentage: {
-          type: Sequelize.DECIMAL(6,2),
+          type: Sequelize.DECIMAL(6, 2),
           defaultValue: 0,
           allowNull: false
         },
@@ -46,17 +46,17 @@ module.exports = {
           allowNull: false
         },
         deletedAt: {
-          type: Sequelize.DATE,
-          allowNull:true,
+          type: Sequelize.DATE(3),
+          allowNull: true,
           defaultValue: null
         },
         createdAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         },
         updatedAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         }
       }
     )

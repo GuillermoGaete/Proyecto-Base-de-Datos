@@ -5,7 +5,7 @@ const connection =  require('../connection')
 var faker = require('faker')
 faker.locale = "es"
 const config = require('../config/seeding/config.json')
-const CategoryMenu = require('../models/auxiliars/categoryMenu')
+const CategoryMenu = require('../models/categoryMenu')
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

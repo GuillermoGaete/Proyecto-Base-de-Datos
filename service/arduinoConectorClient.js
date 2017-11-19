@@ -26,15 +26,15 @@ function insertOrder (order) {
             logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', `Orden:${order.OrderID} - Menu: ${Menu.MenuID} - seended to kitchen correctly.`)
           })
           .catch((err) => {
-            logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', `Error al seteat el timestamp de envio a Arduino:${err}`)
+            logger.log(logger.RED, 'SERVICE arduinoConectorClient', `Error al seteat el timestamp de envio a Arduino:${err}`)
           })
         })
         .catch((err) => {
-          logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', 'Error al buscar las odernes y menues insertados: ' + err.message)
+          logger.log(logger.RED, 'SERVICE arduinoConectorClient', 'Error al buscar las odernes y menues insertados: ' + err.message)
         })
       })
       .catch(function (err) {
-        logger.log(logger.BLUE, 'SERVICE arduinoConectorClient', 'Error al enviar la orden al sistema de preparacion: ' + err.message)
+        logger.log(logger.RED, 'SERVICE arduinoConectorClient', 'Error al enviar la orden al sistema de preparacion: ' + err.message)
       })
     })
   })

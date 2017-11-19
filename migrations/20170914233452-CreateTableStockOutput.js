@@ -11,7 +11,7 @@ module.exports = {
         },
         Amount: {
           type: Sequelize.INTEGER,
-          allowNull: false,
+          allowNull: false
         },
         OrderID: {
           type: Sequelize.INTEGER,
@@ -41,17 +41,17 @@ module.exports = {
           onDelete: 'cascade'
         },
         deletedAt: {
-          type: Sequelize.DATE,
-          allowNull:true,
+          type: Sequelize.DATE(3),
+          allowNull: true,
           defaultValue: null
         },
         createdAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         },
         updatedAt: {
-          type: Sequelize.DATE,
-          allowNull: false,
+          type: Sequelize.DATE(3),
+          allowNull: false
         }
       }
     )
