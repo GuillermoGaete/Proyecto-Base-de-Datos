@@ -34,8 +34,8 @@
     "redis": "^2.8.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "sequelize": "^4.8.3",
-    "sequelize-cli": "^3.0.0-2"
+    "sequelize": "^4.23.1",
+    "sequelize-cli": "^3.1.0"
   },
   "devDependencies": {
     "faker": "^4.1.0",
