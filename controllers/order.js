@@ -92,7 +92,7 @@ function createOrder (req, res) {
                 attributes: OrderAttributes
               }).spread((orderCreated, created) => {
                 var promiseInsertAll = []
-                var list='toKitchen'
+                var list='menuesToKitchen'
                 orderCreated.Menues.forEach(function (menu) {
                   var menuToRedis={
                     "menu": menu.MenuID,
@@ -107,6 +107,9 @@ function createOrder (req, res) {
                   promiseInsertAll.push(promisePublish)
                 })
                 Promise.all(promiseInsertAll).then(values => {
+                  redisClient.pub.publishAsync("toKitchen", orderCreated.Menues.length).then((msg)=>{
+                    return redisClient.printPub("toKitchen",orderCreated.Menues.length)
+                })
                   orderCreated.Menues.forEach(function(menu){
                     menu.OrderMenu.sendToKitchenAt=moment()
                   })
