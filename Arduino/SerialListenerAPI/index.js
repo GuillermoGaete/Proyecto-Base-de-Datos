@@ -1,22 +1,48 @@
-const express = require('express')
-const bodyParser = require('body-parser') // midleware para parsear peticiones HTTP
-const app = express()
 const env = process.env.NODE_ENV || 'development'
 const config = require('../../config/app/config.json')[env]
 const SerialPort = require('serialport')
 const Delimiter = SerialPort.parsers.Delimiter
 const readline = require('readline')
 const logger = require('./logger')
+const redisClient = require('../../service/redisClient')
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 })
 const rp = require('request-promise')
+function processMessages(channel,message){
+  if(channel=="toKitchen"){
+    logger.log(logger.GREEN, 'SERVER', `Llegaron ${message} ordenes para preparar`)
+    recursiveInsert("menuesToKitchen")
+  }
+}
 
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(bodyParser.json())
+function recursiveInsert(list){
+  redisClient.Client.lpopAsync(list).then((readed)=>{
+    if(readed){
+      port.write(`{"action":2,"idMenu":${Menu.MenuID},"idOrder":${Order.OrderID},"elTime":${Menu.ElaborationTimeMin},"idMsg":${Order.OrderID}}`, function (err, result) {
+        if (err) {
+          console.log('Error while sending message : ' + err)
+        }
+        if (result) {
+          console.log('Response received after sending message : ' + result)
+        }
 
+      })
+      redisClient.pub.publishAsync("ackFromKitchen",readed).then((msg)=>{
+        setTimeout(recursiveInsert(list),500)
+        return redisClient.printPub("toKitchen",orderCreated.Menues.length)
+      })
+    }
+    logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes ${message} preparar`)
+  })
+  .catch((err) =>{
+    console.log(err)
+  })
+}
+var port=null
+var parser=null
 SerialPort.list(function (err, ports) {
   if (err) {
     console.log(`Se pprodujo un error ${err}`)
@@ -28,6 +54,21 @@ SerialPort.list(function (err, ports) {
     }
   })
   rl.question('Seleccione el numero de puerto: ', (answer) => {
+    port = new SerialPort(ports[answer - 1].comName)
+    logger.log(logger.GREEN, 'SERVER', `Conectado a Arduino via: ${ports[answer - 1].comName}...`)
+    parser = port.pipe(new Delimiter({ delimiter: Buffer.from('}') }))
+
+    redisClient.sub.subscribe("toKitchen")
+    redisClient.sub.on("message", function (channel, message) {
+      redisClient.printSub(channel,message)
+      processMessages(channel,message)
+    })
+
+
+
+
+/*
+
     app.listen(config.portArduinoAPI, () => {
       logger.log(logger.GREEN, 'SERVER', `API interna Arduino corriendo en http://${config.host}:${config.portArduinoAPI}`)
       var port = new SerialPort(ports[answer - 1].comName)
@@ -100,6 +141,6 @@ SerialPort.list(function (err, ports) {
           console.log(e)
         }
       })
-    })
+    })*/
   })
 })
