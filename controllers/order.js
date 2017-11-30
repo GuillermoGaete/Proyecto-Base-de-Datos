@@ -96,7 +96,8 @@ function createOrder (req, res) {
                 orderCreated.Menues.forEach(function (menu) {
                   var menuToRedis={
                     "menu": menu.MenuID,
-                    "order": menu.OrderMenu.OrderMenuID
+                    "order": menu.OrderMenu.OrderMenuID,
+                    "elaborationTime":menu.ElaborationTimeMin
                   }
                   var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
                     return redisClient.printInsertion(list,insert,menuToRedis)

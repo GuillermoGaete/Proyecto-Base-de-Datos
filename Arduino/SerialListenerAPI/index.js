@@ -21,7 +21,8 @@ function processMessages(channel,message){
 function recursiveInsert(list){
   redisClient.Client.lpopAsync(list).then((readed)=>{
     if(readed){
-      port.write(`{"action":2,"idMenu":${Menu.MenuID},"idOrder":${Order.OrderID},"elTime":${Menu.ElaborationTimeMin},"idMsg":${Order.OrderID}}`, function (err, result) {
+      var menu=JSON.parse(readed)
+      port.write(`{"action":2,"idMenu":${menu.menu},"idOrder":${menu.order},"elTime":${menu.elaborationTime},"idMsg":${menu.order}}`, function (err, result) {
         if (err) {
           console.log('Error while sending message : ' + err)
         }
@@ -32,10 +33,10 @@ function recursiveInsert(list){
       })
       redisClient.pub.publishAsync("ackFromKitchen",readed).then((msg)=>{
         setTimeout(recursiveInsert(list),500)
-        return redisClient.printPub("toKitchen",orderCreated.Menues.length)
+        redisClient.printPub("ackFromKitchen",readed)
       })
     }
-    logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes ${message} preparar`)
+    logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes preparar`)
   })
   .catch((err) =>{
     console.log(err)
