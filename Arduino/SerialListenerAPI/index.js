@@ -11,18 +11,35 @@ const rl = readline.createInterface({
   output: process.stdout
 })
 const rp = require('request-promise')
+
+//TODO - refactor this code, logic to recursive reading from REDIS queque
+
 function processMessages(channel,message){
   if(channel=="toKitchen"){
     logger.log(logger.GREEN, 'SERVER', `Llegaron ${message} ordenes para preparar`)
     recursiveInsert("menuesToKitchen")
   }
+  if(channel=="getTimes"){
+    logger.log(logger.GREEN, 'SERVER', `Pedido de tiempos para queque ${message}`)
+  }
 }
 
 function recursiveInsert(list){
-  redisClient.Client.lpopAsync(list).then((readed)=>{
+  redisClient.Client.lpopAsync(list).then(readed=>readedFromQueque(list,readed))
+  .catch((err) =>{
+    console.log(err)
+  })
+}
+
+function continueReading(list,readed){
+    setTimeout(function(){
+      recursiveInsert(list)
+    }, 500)
+}
+function readedFromQueque(list,readed){
     if(readed){
       var menu=JSON.parse(readed)
-      port.write(`{"action":2,"idMenu":${menu.menu},"idOrder":${menu.order},"elTime":${menu.elaborationTime},"idMsg":${menu.order}}`, function (err, result) {
+      port.write(`{"action":2,"idMenu":${menu.menu},"idOrder":${menu.order},"elTime":${menu.elaborationTime},"idMsg":${menu.order}}`, function (err, result,list,readed) {
         if (err) {
           console.log('Error while sending message : ' + err)
         }
@@ -31,17 +48,13 @@ function recursiveInsert(list){
         }
 
       })
-      redisClient.pub.publishAsync("ackFromKitchen",readed).then((msg)=>{
-        setTimeout(recursiveInsert(list),500)
-        redisClient.printPub("ackFromKitchen",readed)
-      })
+      continueReading(list,readed)
+    }else{
+      logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes preparar`)
     }
-    logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes preparar`)
-  })
-  .catch((err) =>{
-    console.log(err)
-  })
 }
+
+
 var port=null
 var parser=null
 SerialPort.list(function (err, ports) {
@@ -58,90 +71,43 @@ SerialPort.list(function (err, ports) {
     port = new SerialPort(ports[answer - 1].comName)
     logger.log(logger.GREEN, 'SERVER', `Conectado a Arduino via: ${ports[answer - 1].comName}...`)
     parser = port.pipe(new Delimiter({ delimiter: Buffer.from('}') }))
-
+    parser.on('data', data => processDataFromArduino(data))
     redisClient.sub.subscribe("toKitchen")
+    redisClient.sub.subscribe("getTimes")
     redisClient.sub.on("message", function (channel, message) {
       redisClient.printSub(channel,message)
       processMessages(channel,message)
     })
-
-
-
-
-/*
-
-    app.listen(config.portArduinoAPI, () => {
-      logger.log(logger.GREEN, 'SERVER', `API interna Arduino corriendo en http://${config.host}:${config.portArduinoAPI}`)
-      var port = new SerialPort(ports[answer - 1].comName)
-      logger.log(logger.GREEN, 'SERVER', `Conectado a Arduino via: ${ports[answer - 1].comName}...`)
-      const parser = port.pipe(new Delimiter({ delimiter: Buffer.from('}') }))
-
-      app.post('/insertOrder', (req, res) => {
-        const Menu = req.body.Menu
-        const Order = req.body.Order
-        port.write(`{"action":2,"idMenu":${Menu.MenuID},"idOrder":${Order.OrderID},"elTime":${Menu.ElaborationTimeMin},"idMsg":${Order.OrderID}}`, function (err, result) {
-          if (err) {
-            console.log('Error while sending message : ' + err)
-          }
-          if (result) {
-            console.log('Response received after sending message : ' + result)
-          }
-        })
-        // TODO tiene problemas para manejar muchas ordenes, la solucion es ponerla en una fila y retirarla al recibir la confirmacion desde Arduino.
-        // en esta ruta solo informar la recepcion por parte del servidor
-        // corregir lo que esta haciendo arduinoConectorClient que no esta bien tampoco
-        res.status(200).send({
-          recived: true
-        })
-      })
-
-      parser.on('data', function (data) {
-        var fixedData = Buffer.concat([ data, Buffer.from('}') ])
-        try {
-          var options = { }
-          var jsonData = JSON.parse(fixedData.toString())
-          if (jsonData.hasOwnProperty('action') && jsonData.action === 'finish_order') {
-            logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
-            options = {
-              method: 'PUT',
-              uri: 'http://localhost:3000/api/order-menu/finished',
-              body: {
-                Menu: jsonData.menu,
-                Order: jsonData.order
-              },
-              json: true // Automatically stringifies the body to JSON
-            }
-            rp(options)
-            .then(function (parsedBody) {
-              logger.log(logger.GREEN, 'INFO', `Finalizacion informada al servidor correctamente`)
-            })
-            .catch((err) => {
-              logger.log(logger.RED, 'ERROR', `Error al informar que la orden finalizo correctamente - Error:${err}`)
-            })
-          }
-          if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
-            logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
-            options = {
-              method: 'PUT',
-              uri: 'http://localhost:3000/api/order-menu/ack',
-              body: {
-                Menu: jsonData.menu,
-                Order: jsonData.order
-              },
-              json: true // Automatically stringifies the body to JSON
-            }
-            rp(options)
-            .then(function (parsedBody) {
-              logger.log(logger.GREEN, 'INFO', `Insercion informada al servidor correctamente`)
-            })
-            .catch((err) => {
-              logger.log(logger.RED, 'ERROR', `Error al informar que la orden se inserto correctamente - Error:${err}`)
-            })
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      })
-    })*/
   })
 })
+
+function processDataFromArduino(data){
+  var fixedData = Buffer.concat([ data, Buffer.from('}') ])
+  try {
+    var options = { }
+    var jsonData = JSON.parse(fixedData.toString())
+    if (jsonData.hasOwnProperty('action') && jsonData.action === 'finish_order') {
+      logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
+      const jsonDataSting = JSON.stringify(jsonData)
+      redisClient.pub.publishAsync("readyFromKitchen",jsonDataSting).then((msg)=>{
+        redisClient.printPub("readyFromKitchen",msg)
+      })
+    }
+    if (jsonData.hasOwnProperty('action') && jsonData.action === 'order_inserted') {
+      logger.log(logger.BLUE, 'ACTION', ' type: ' + jsonData.action + ' - order: ' + jsonData.order + ' - menu: ' + jsonData.menu + ' - queque: ' + jsonData.queque)
+      const jsonDataSting = JSON.stringify(jsonData)
+      redisClient.pub.publishAsync("ackFromKitchen",jsonDataSting).then((msg)=>{
+        redisClient.printPub("ackFromKitchen",msg)
+      })
+    }
+    if (jsonData.hasOwnProperty('info') && jsonData.info === 'times') {
+      logger.log(logger.BLUE, 'INFO', ' type: ' + jsonData.info + ' - queque: ' + jsonData.queque + ' - header: ' + jsonData.timeHeader + ' - consumed: ' + jsonData.timeConsumed)
+      const jsonDataSting = JSON.stringify(jsonData)
+      redisClient.pub.publishAsync("ackFromKitchen",jsonDataSting).then((msg)=>{
+        redisClient.printPub("ackFromKitchen",msg)
+      })
+    }
+  } catch (e) {
+    logger.log(logger.RED, 'ERROR', `Error al leer datos desde arduino - Error:${err}`)
+  }
+}

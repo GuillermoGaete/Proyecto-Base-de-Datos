@@ -61,7 +61,8 @@ int Kitchen::getLessFullQueque(){
 
 int Kitchen::pushMenu(KitchenItem *item){
   int numberQueque=getLessFullQueque();
-  pushMenu(numberQueque,item);
+  int inserted = pushMenu(numberQueque,item);
+  return inserted
 }
 
 int Kitchen::pushMenu(int numberQueque,KitchenItem *item){
@@ -77,7 +78,7 @@ int Kitchen::pushMenu(int numberQueque,KitchenItem *item){
     queques[numberQueque].timeConsumed=queques[numberQueque].timeConsumed+item->elaborationTime;
     return numberQueque;
   }else{
-    return -2;
+    return numberQueque;
   }
 }
 

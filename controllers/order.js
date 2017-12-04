@@ -10,6 +10,7 @@ const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', '
 const logger = require('../helpers/logger')
 const redisClient = require('../service/redisClient')
 const moment = require('moment')
+const OrderMenuController = require('../controllers/orderMenu')
 
 
 function getOrder (req, res) {
@@ -111,10 +112,10 @@ function createOrder (req, res) {
                   redisClient.pub.publishAsync("toKitchen", orderCreated.Menues.length).then((msg)=>{
                     return redisClient.printPub("toKitchen",orderCreated.Menues.length)
                 })
-                  orderCreated.Menues.forEach(function(menu){
-                    menu.OrderMenu.sendToKitchenAt=moment()
-                  })
                   orderCreated.save().then((orderSaved)=>{
+                    orderSaved.Menues.forEach(function(menu){
+                      OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
+                    })
                     logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! ID:${orderCreated.OrderID}`)
                     res.status(200).send({
                       created: true,

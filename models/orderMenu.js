@@ -44,6 +44,20 @@ const OrderMenu = Conection.define('OrderMenu', {
     type: Sequelize.VIRTUAL,
     get: function () {
       var finishDate = moment(this.get('finishedAt'))
+      var sendDate = moment(this.get('ackFromKitchenAt'))
+      if (finishDate == null) {
+        return null
+      }
+      if (sendDate == null) {
+        return null
+      }
+      return finishDate.diff(sendDate, 'seconds')
+    }
+  },
+  inKitchenTime: {
+    type: Sequelize.VIRTUAL,
+    get: function () {
+      var finishDate = moment(this.get('finishedAt'))
       var sendDate = moment(this.get('sendToKitchenAt'))
       if (finishDate == null) {
         return null

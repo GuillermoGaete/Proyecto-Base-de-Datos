@@ -1,7 +1,34 @@
-const rp = require('request-promise')
 const sequelize = require('sequelize')
-const OrderMenu = require('../models/orderMenu')
+const OrderMenuController = require('../controllers/orderMenu')
+const OrderController = require('../controllers/order')
+const MenuController = require('../controllers/menu')
 const logger = require('../helpers/logger')
+const redisClient = require('./redisClient')
+
+function init(){
+  redisClient.sub.subscribe("ackFromKitchen")
+  redisClient.sub.subscribe("readyFromKitchen")
+  redisClient.sub.on("message", function (channel, message) {
+    redisClient.printSub(channel,message)
+    processMessages(channel,message)
+  })
+  return true
+}
+
+function processMessages(channel,message){
+  const jsonMessage = JSON.parse(message)
+  switch (channel) {
+      case "ackFromKitchen":
+          OrderMenuController.ackOrder(jsonMessage.order)
+          break;
+      case "readyFromKitchen":
+          OrderMenuController.readyOrder(jsonMessage.order)
+          break;
+      default:
+          logger.log(logger.RED, 'SERVICE arduinoConectorClient', `Unprocesed message - Message: ${message} - Channel: ${channel}`)
+      break;
+  }
+}
 
 function insertOrder (order) {
   var MenuesPromise = order.getMenues()
@@ -41,6 +68,8 @@ function insertOrder (order) {
   return collectedPromise
 }
 
+
+
 module.exports = {
-  insertOrder
+  init
 }

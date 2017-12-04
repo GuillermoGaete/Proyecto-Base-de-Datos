@@ -84,7 +84,7 @@ void sendInserted(int order,int insertResult,int menu){
   StaticJsonBuffer<512> jsonBuffer;
   JsonObject& senderJsonInserted = jsonBuffer.parseObject("{}");
   senderJsonInserted["action"]="order_inserted";
-  if(insertResult>0){
+  if(insertResult>=0){
      senderJsonInserted["state"]="inserted";
      senderJsonInserted["queque"]=insertResult;
   }else{
