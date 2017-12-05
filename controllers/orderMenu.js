@@ -1,21 +1,22 @@
 const OrderMenu = require('../models/orderMenu')
 const sequelize = require('sequelize')
 const logger = require('../helpers/logger')
+const redisClient = require('../service/redisClient')
 
 function ackOrder (order) {
   OrderMenu.findById(order).then(Order => {
     if (Order == null) {
-      logger.log(logger.RED, 'CONTROLLER orderMenu', `Not found - Order:${order}`)
+      logger.log(logger.RED, 'CONTROLLER orderMenu', `Not found - orderMenu:${order}`)
     } else {
       Order.update({
         ackFromKitchenAt: sequelize.fn('NOW'),
         sendToKitchenAt: Order.sendToKitchenAt,
         finishedAt: Order.finishedAt
       }).then((order) => {
-        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `Order updated! Ack recived from Kitchen - Order:${order.OrderMenuID}`)
+        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `orderMenu updated! Ack recived from Kitchen - orderMenuID:${order.OrderMenuID} - orderID:${order.OrderID}`)
       })
       .catch((err) => {
-        logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update Ack to order - Order:${order} - Error: ${err}`)
+        logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update Ack to order - orderMenuID:${order} - Error: ${err}`)
       })
     }
   })
@@ -31,10 +32,13 @@ function sentToKitchenOrder (order) {
         sendToKitchenAt: sequelize.fn('NOW'),
         finishedAt: Order.finishedAt
       }).then((order) => {
-        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `Order updated! "sendToKitchenAt" - Order:${order.OrderMenuID}`)
+        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `orderMenu updated! "sendToKitchenAt" - orderMenuID:${order.OrderMenuID} - orderID:${order.OrderID}`)
+        redisClient.pub.publishAsync("toStockManagerOut",order.MenuID).then((msg)=>{
+          return redisClient.printPub("toStockManagerOut",msg)
+        })
       })
       .catch((err) => {
-        logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update "sendToKitchenAt" to order - Order:${order} - Error: ${err}`)
+        logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update "sendToKitchenAt" to orderMenu - orderMenuID:${order} - Error: ${err}`)
       })
     }
   })
@@ -51,7 +55,7 @@ function readyOrder (order) {
         ackFromKitchenAt: Order.ackFromKitchenAt
       }).then((orderUpdated) => {
         OrderMenu.findById(orderUpdated.OrderMenuID).then(orderSaved=>{
-          logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `Order updated! Finish recived from Kitchen - Order:${orderSaved.OrderMenuID} - cookTime:${orderSaved.cookTime}`)
+          logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `OrderMenu updated! Finish recived from Kitchen - OrderMenuID:${orderSaved.OrderMenuID} - cookTime:${orderSaved.cookTime} - orderID:${orderSaved.OrderID}`)
         })
         })
       .catch((err) => {

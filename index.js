@@ -5,7 +5,7 @@ const config = require('./config/app/config.json')[env]
 const conn = require('./connection')
 const app = require('./app')
 const logger = require('./helpers/logger')
-const arduinoConector = require('./service/arduinoConectorClient')
+const routerPublishedChannels = require('./service/routerPublishedChannels')
 
 conn
   .authenticate()
@@ -14,7 +14,7 @@ conn
     // Pongo la aplicacion a correr en el puerto que corresponde
     app.listen(config.port, () => {
       logger.log(logger.GREEN, 'SERVER', `API REST corriendo en http://${config.host}:${config.port}`)
-      arduinoConector.init()
+      routerPublishedChannels.init()
     })
   })
   .catch(err => {

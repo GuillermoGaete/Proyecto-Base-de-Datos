@@ -70,130 +70,58 @@ function getOrders (req, res) {
 }
 
 function createOrder (req, res) {
-  const order = Order.build({
+  var order = Order.create({
     CustomerID: req.body.CustomerID ? req.body.CustomerID : 3
-  })
-  order.save()
-        .then(() => {
-          Menu.findAll({ where: { MenuID: req.body.MenuesID } }).then(menus => {
-            order.addMenues(menus).then((orderWithMenues) => {
-              Order.findOrCreate({
-                where: {OrderID: order.OrderID},
-                include: [
-                  {
-                    model: Customer,
-                    attributes: CustomerAttributes
-                  },
-                  {
-                    model: Menu,
-                    as: 'Menues',
-                    attributes: MenuAttributes
-                  }
-                ],
-                attributes: OrderAttributes
-              }).spread((orderCreated, created) => {
-                var promiseInsertAll = []
-                var list='menuesToKitchen'
-                orderCreated.Menues.forEach(function (menu) {
-                  var menuToRedis={
-                    "menu": menu.MenuID,
-                    "order": menu.OrderMenu.OrderMenuID,
-                    "elaborationTime":menu.ElaborationTimeMin
-                  }
-                  var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
-                    return redisClient.printInsertion(list,insert,menuToRedis)
-                  })
-                  .catch((err) =>{
-                    return redisClient.printErrorInsertion(list,err,menuToRedis)
-                  })
-                  promiseInsertAll.push(promisePublish)
-                })
-                Promise.all(promiseInsertAll).then(values => {
-                  redisClient.pub.publishAsync("toKitchen", orderCreated.Menues.length).then((msg)=>{
-                    return redisClient.printPub("toKitchen",orderCreated.Menues.length)
-                })
-                  orderCreated.save().then((orderSaved)=>{
-                    orderSaved.Menues.forEach(function(menu){
-                      OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
-                    })
-                    logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! ID:${orderCreated.OrderID}`)
-                    res.status(200).send({
-                      created: true,
-                      saved: true,
-                      order: orderSaved
-                    })
-                  })
-                  .catch(() =>{
-                    logger.log(logger.RED, 'CONTROLLER order', `Order - Error saving`)
-                    res.status(500).send({
-                      created: false,
-                      message: `Error internal code: 0x01`
-                    })
-                  })
-                })
-                .catch(reasons => {
-                  orderCreated.destroy({ force: true }).then(() =>{
-                    logger.log(logger.RED, 'CONTROLLER order', `Order destroyed - Error in redis RPUSH method`)
-                    res.status(500).send({
-                      created: false,
-                      message: `Error internal code: 0x03`
-                    })
-                  })
-                  .catch((err) =>{
-                    logger.log(logger.RED, 'CONTROLLER order', `Order destroying - Error destroy sequelize command`)
-                    res.status(500).send({
-                      created: false,
-                      message: `Error internal code: 0x02`
-                    })
-                  })
-                })
-              })
-              .catch((err) => {
-                console.error(`Error al guardar los valores: ${err}`)
-                res.status(400).send({
-                  message: 'Se produjo un error inesperado'
-                })
-              })
-                /*
-                ServiceArduino.insertOrder(order).then((response) => {
-                Order.findOrCreate({
-                  where: {OrderID: order.OrderID},
-                  include: [
-                    {
-                      model: Customer,
-                      attributes: CustomerAttributes
-                    },
-                    {
-                      model: Menu,
-                      as: 'Menues',
-                      attributes: MenuAttributes
-                    }
-                  ],
-                  attributes: OrderAttributes
-                }).spread((orderCreated, created) => {
-                  res.status(200).send({
-                    created: true,
-                    message: 'Se cargo la orden correctamente',
-                    order: orderCreated
-                  })
-                })
-                .catch((err) => {
-                  console.error(`Error al guardar los valores: ${err}`)
-                  res.status(400).send({
-                    message: 'Se produjo un error inesperado'
-                  })
-                })
-              })
-              .catch((err) => {
-                console.error(`Error al utilizar insert en arduino: ${err}`)
-              })
-              */
-            })
-            .catch((err) => {
-              logger.log(logger.RED, 'CONTROLLER order', `Error al agregar menues:${err})`)
-            })
+  }).then(order=>{
+    order.setMenues(req.body.MenuesID).then(()=>{
+      Order.findById(order.OrderID,{
+        include: [
+          {
+            model: Customer,
+            attributes: CustomerAttributes
+          },
+          {
+            model: Menu,
+            as: 'Menues',
+            attributes: MenuAttributes
+          }
+        ],
+        attributes: OrderAttributes
+      }).then(orderCreated=>{
+        var promiseInsertAll = []
+        var list='menuesToKitchen'
+        orderCreated.Menues.forEach(function(menu){
+          var menuToRedis={
+            "menu": menu.MenuID,
+            "order": menu.OrderMenu.OrderMenuID,
+            "elaborationTime":menu.ElaborationTimeMin
+          }
+          var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
+              return redisClient.printInsertion(list,insert,menuToRedis)
           })
+          .catch((err) =>{
+            return redisClient.printErrorInsertion(list,err,menuToRedis)
+          })
+          promiseInsertAll.push(promisePublish)
         })
+        Promise.all(promiseInsertAll).then(values => {
+          orderCreated.Menues.forEach(function(menu){
+          OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
+          })
+          redisClient.pub.publishAsync("toKitchen", orderCreated.Menues.length).then((msg)=>{
+            return redisClient.printPub("toKitchen",orderCreated.Menues.length)
+          })
+
+          res.status(200).send({
+            created: true,
+            saved: true,
+            order: orderCreated
+          })
+            logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
+        })
+      })
+    })
+  })
 }
 
 function updateOrder (req, res) {
