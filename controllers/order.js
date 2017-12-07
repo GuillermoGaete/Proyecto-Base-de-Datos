@@ -12,14 +12,40 @@ const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const OrderMenuController = require('../controllers/orderMenu')
 
+function getLastOrder (req, res) {
+  Order.findAll({
+    limit:1,
+    order:[['createdAt','DESC']],
+    include: [
+      {
+        model: Menu,
+        attributes: MenuAttributes,
+        unique:false
+      }
+    ],
+    attributes: OrderAttributes
+  }).then(orders=>{
+    if (orders[0] == null) {
+      res.status(404).send({
+        found: false,
+        message: `No se encontro un el ultimo orden`
+      })
+    } else {
+        res.status(200).send({
+          found: true,
+          Order:orders[0]
+        })
+    }
+  })
+}
 
 function getOrder (req, res) {
   Order.findById(req.params.orderID, {
     include: [
       {
         model: Menu,
-        as: 'Menues',
-        attributes: MenuAttributes
+        attributes: MenuAttributes,
+        unique:false
       }
     ],
     attributes: OrderAttributes
@@ -30,10 +56,13 @@ function getOrder (req, res) {
         message: `No se encontro un Order con ID ${req.params.orderID}`
       })
     } else {
-      res.status(200).send({
-        found: true,
-        Order: Order
+      Order.getMenus().then((menues)=>{
+        res.status(200).send({
+          found: true,
+          Order:menues
+        })
       })
+
     }
   })
 }
@@ -73,7 +102,7 @@ function createOrder (req, res) {
   var order = Order.create({
     CustomerID: req.body.CustomerID ? req.body.CustomerID : 3
   }).then(order=>{
-    order.setMenues(req.body.MenuesID).then(()=>{
+    order.setMenus(req.body.MenuesID).then((menues)=>{
       Order.findById(order.OrderID,{
         include: [
           {
@@ -82,7 +111,6 @@ function createOrder (req, res) {
           },
           {
             model: Menu,
-            as: 'Menues',
             attributes: MenuAttributes
           }
         ],
@@ -90,35 +118,38 @@ function createOrder (req, res) {
       }).then(orderCreated=>{
         var promiseInsertAll = []
         var list='menuesToKitchen'
-        orderCreated.Menues.forEach(function(menu){
-          var menuToRedis={
-            "menu": menu.MenuID,
-            "order": menu.OrderMenu.OrderMenuID,
-            "elaborationTime":menu.ElaborationTimeMin
-          }
-          var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
-              return redisClient.printInsertion(list,insert,menuToRedis)
+        orderCreated.getMenus().then((menues)=>{
+          menues.forEach(function(menu){
+            var menuToRedis={
+              "menu": menu.MenuID,
+              "order": menu.OrderMenu.OrderMenuID,
+              "elaborationTime":menu.ElaborationTimeMin
+            }
+            var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
+                return redisClient.printInsertion(list,insert,menuToRedis)
+            })
+            .catch((err) =>{
+              return redisClient.printErrorInsertion(list,err,menuToRedis)
+            })
+            promiseInsertAll.push(promisePublish)
           })
-          .catch((err) =>{
-            return redisClient.printErrorInsertion(list,err,menuToRedis)
-          })
-          promiseInsertAll.push(promisePublish)
-        })
-        Promise.all(promiseInsertAll).then(values => {
-          orderCreated.Menues.forEach(function(menu){
-          OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
-          })
-          redisClient.pub.publishAsync("toKitchen", orderCreated.Menues.length).then((msg)=>{
-            return redisClient.printPub("toKitchen",orderCreated.Menues.length)
-          })
+          Promise.all(promiseInsertAll).then((values) => {
+            menues.forEach(function(menu){
+              OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
+            })
+            redisClient.pub.publishAsync("toKitchen", menues.length).then((msg)=>{
+              return redisClient.printPub("toKitchen",menues.length)
+            })
 
-          res.status(200).send({
-            created: true,
-            saved: true,
-            order: orderCreated
+            res.status(200).send({
+              created: true,
+              saved: true,
+              order: orderCreated
+            })
+              logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
           })
-            logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
         })
+
       })
     })
   })
@@ -213,6 +244,7 @@ function deleteOrder (req, res) {
 module.exports = {
   updateOrder,
   getOrder,
+  getLastOrder,
   getOrders,
   deleteOrder,
   createOrder,

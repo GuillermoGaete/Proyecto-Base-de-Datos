@@ -13,7 +13,10 @@ function ackOrder (order) {
         sendToKitchenAt: Order.sendToKitchenAt,
         finishedAt: Order.finishedAt
       }).then((order) => {
-        logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `orderMenu updated! Ack recived from Kitchen - orderMenuID:${order.OrderMenuID} - orderID:${order.OrderID}`)
+        redisClient.pub.publishAsync("toStockManagerOut",order.MenuID).then((msg)=>{
+          logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `orderMenu updated! Ack recived from Kitchen - orderMenuID:${order.OrderMenuID} - orderID:${order.OrderID}`)
+          return redisClient.printPub("toStockManagerOut",msg)
+        })
       })
       .catch((err) => {
         logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update Ack to order - orderMenuID:${order} - Error: ${err}`)
@@ -33,9 +36,6 @@ function sentToKitchenOrder (order) {
         finishedAt: Order.finishedAt
       }).then((order) => {
         logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `orderMenu updated! "sendToKitchenAt" - orderMenuID:${order.OrderMenuID} - orderID:${order.OrderID}`)
-        redisClient.pub.publishAsync("toStockManagerOut",order.MenuID).then((msg)=>{
-          return redisClient.printPub("toStockManagerOut",msg)
-        })
       })
       .catch((err) => {
         logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying update "sendToKitchenAt" to orderMenu - orderMenuID:${order} - Error: ${err}`)

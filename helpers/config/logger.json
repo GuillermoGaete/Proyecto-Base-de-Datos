@@ -1,4 +1,4 @@
 {
-  "print":["CONTROLLER","SERVER","SERVICE"],
+  "print":["CONTROLLER","SERVER","SERVICE","REDIS"],
   "noPrint":["REDIS"]
 }

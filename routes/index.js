@@ -22,6 +22,8 @@ api.post('/order', OrderController.createOrder)
 
 api.get('/order/:orderID', OrderController.getOrder)
 
+api.get('/order/last', OrderController.getLastOrder)
+
 api.get('/orders(/:limit)?', OrderController.getOrders)
 
 api.put('/order/:orderID', OrderController.updateOrder)
