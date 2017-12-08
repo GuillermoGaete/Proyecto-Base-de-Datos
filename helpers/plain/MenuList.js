@@ -12,7 +12,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'Sadwitch de Salame y Queso',
@@ -20,7 +20,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -33,7 +33,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'Ensalada Mediterranea',
@@ -41,7 +41,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -54,7 +54,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'Helado',
@@ -62,7 +62,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -75,7 +75,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'Sorrentinos',
@@ -83,7 +83,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -96,7 +96,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'Pizza muzzarella',
@@ -104,7 +104,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -117,7 +117,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'carne',
@@ -125,7 +125,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -138,7 +138,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'milanesa con papas fritas',
@@ -146,7 +146,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   },
@@ -159,7 +159,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       },
       {
         Name: 'suprema con papas fritas',
@@ -167,7 +167,7 @@ const MenusList = [
         ShorDescription: faker.lorem.slug(),
         Price: (60 + (faker.random.number(10) * 12) + (faker.random.number(7) * (5.5))),
         DiscountPercentage: (faker.random.number(3) / 10) * faker.random.number(1),
-        ElaborationTimeMin: (60 + (faker.random.number(10) * 4) + (faker.random.number(7) * (8)))
+        ElaborationTimeMin: (5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1)))
       }
     ]
   }

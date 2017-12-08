@@ -56,8 +56,11 @@ function readyOrder (order) {
       }).then((orderUpdated) => {
         OrderMenu.findById(orderUpdated.OrderMenuID).then(orderSaved=>{
           logger.log(logger.YELLOW, 'CONTROLLER orderMenu', `OrderMenu updated! Finish recived from Kitchen - OrderMenuID:${orderSaved.OrderMenuID} - cookTime:${orderSaved.cookTime} - orderID:${orderSaved.OrderID}`)
+          redisClient.pub.publishAsync("checkOrder",orderSaved.OrderID).then((msg)=>{
+            return redisClient.printPub("checkOrder",msg)
+          })
         })
-        })
+      })
       .catch((err) => {
         logger.log(logger.RED, 'CONTROLLER orderMenu', `Error while trying "finishedAt" to order - Order:${order} - Error: ${err}`)
       })

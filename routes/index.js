@@ -7,51 +7,29 @@ const OrderController = require('../controllers/order')
 const OrderMenuController = require('../controllers/orderMenu')
 const MenuController = require('../controllers/menu')
 const IngredientController = require('../controllers/ingredient')
-
 api.post('/customer', CustomerController.createCustomer)
-
 api.get('/customer/:customerID', CustomerController.getCustomer)
-
 api.get('/customers(/:limit)?', CustomerController.getCustomers)
-
 api.put('/customer/:customerID', CustomerController.updateCustomer)
-
 api.delete('/customer/:customerID', CustomerController.deleteCustomer)
 
 api.post('/order', OrderController.createOrder)
-
 api.get('/order/:orderID', OrderController.getOrder)
-
-api.get('/order/last', OrderController.getLastOrder)
-
+api.get('/lastOrder', OrderController.getLastOrder)
 api.get('/orders(/:limit)?', OrderController.getOrders)
-
 api.put('/order/:orderID', OrderController.updateOrder)
-
 api.delete('/order/:orderID', OrderController.deleteOrder)
 
-api.put('/order-menu/ack', OrderMenuController.ackOrder)
-
-api.put('/order-menu/finished', OrderMenuController.finishedOrder)
-
 api.post('/menu', MenuController.createMenu)
-
 api.get('/menu/:menuID', MenuController.getMenu)
-
 api.get('/menus(/:limit)?', MenuController.getMenus)
-
 api.put('/menu/:menuID', MenuController.updateMenu)
-
 api.delete('/menu/:menuID', MenuController.deleteMenu)
 
 api.post('/ingredient', IngredientController.createIngredient)
-
 api.get('/ingredient/:ingredientID', IngredientController.getIngredient)
-
 api.get('/ingredients(/:limit)?', IngredientController.getIngredients)
-
 api.put('/ingredient/:ingredientID', IngredientController.updateIngredient)
-
 api.delete('/ingredient/:ingredientID', IngredientController.deleteIngredient)
 
 module.exports = api

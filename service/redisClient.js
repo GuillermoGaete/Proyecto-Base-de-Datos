@@ -33,7 +33,11 @@ function printErrorInsertion(list,err,menuToRedis){
   logger.log(logger.RED, 'REDIS', `Error try insert in list:${list} - err: ${err} - Menu:${JSON.stringify(menuToRedis)}`)
 }
 function printPub(channel,payload){
-  logger.log(logger.BLUE, 'REDIS', `Publish new message in Channel: ${channel} - Message: ${payload}`)
+  if(payload==1){
+    logger.log(logger.BLUE, 'REDIS', `PUBLISH new message in Channel: ${channel}`)
+  }else{
+    logger.log(logger.BLUE, 'REDIS', `PUBLISH ${payload} new messages in Channel: ${channel}`)
+  }
 }
 function printSub(channel,payload){
   logger.log(logger.BLUE, 'REDIS', `New message in suscribed Channel: ${channel} - Message: ${payload}`)

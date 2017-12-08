@@ -4,14 +4,15 @@ const Customer = require('../models/customer')
 const Menu = require('../models/menu')
 const config = require('./config.json')
 const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePhone', 'Gender']
-const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt', 'updatedAt', 'requiredAt']
+const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt','completedAt','updatedAt', 'requiredAt','cookTime']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', 'ShorDescription', 'Price', 'DiscountPercentage']
-// const ServiceArduino = require('../service/arduinoConectorClient')
 const logger = require('../helpers/logger')
 const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const OrderMenuController = require('../controllers/orderMenu')
-
+const sequelize = require('sequelize')
+const dev=true;
+const faker = require('faker')
 function getLastOrder (req, res) {
   Order.findAll({
     limit:1,
@@ -56,16 +57,93 @@ function getOrder (req, res) {
         message: `No se encontro un Order con ID ${req.params.orderID}`
       })
     } else {
-      Order.getMenus().then((menues)=>{
         res.status(200).send({
           found: true,
-          Order:menues
+          Order:Order
         })
-      })
-
     }
   })
 }
+
+function checkCompleted(orderID){
+  Order.findById(orderID).then(Order => {
+    if (Order == null) {
+      res.status(404).send({
+        found: false,
+        message: `No se encontro un Order con ID ${req.params.orderID}`
+      })
+    } else {
+      Order.getMenus().then((menues)=>{
+        var ready=1;
+        menues.forEach(function(menu){
+          if(menu.OrderMenu.cookTime){
+            ready=ready*1;
+          }else{
+            ready=ready*0;
+          }
+        })
+        if(ready){
+          logger.log(logger.YELLOW, 'CONTROLLER order', `Order READY! - Order:${Order.OrderID}`)
+          setCompleted(Order.OrderID)
+        }else{
+          logger.log(logger.YELLOW, 'CONTROLLER order', `Order not ready - Order:${Order.OrderID}`)
+        }
+      })
+    }
+  })
+}
+
+function setCompleted(OrderID){
+  Order.findById(OrderID).then(Order => {
+    if (Order == null) {
+      logger.log(logger.RED, 'CONTROLLER order', `Order not found trying set completed - Order:${OrderID}`)
+    } else {
+      Order.update({
+        completedAt: sequelize.fn('NOW')
+      }).then((orderSaved) => {
+        redisClient.pub.publishAsync("orderCompleted",orderSaved.OrderID).then((msg)=>{
+          msgToClient("ready",orderSaved.OrderID)
+          return redisClient.printPub("orderCompleted",msg)
+        })
+      })
+    }
+  })
+}
+
+function msgToClient(action,order){
+  Order.findById(order, {
+    include: [
+      {
+        model: Menu,
+        attributes: MenuAttributes,
+        unique:false
+      },
+      {
+        model: Customer,
+        attributes: CustomerAttributes
+      }
+    ],
+    attributes: OrderAttributes
+  }).then(Order => {
+    if (Order == null) {
+      logger.log(logger.RED, 'CONTROLLER order', `Order not found trying set completed - Order:${OrderID}`)
+    } else {
+      if(action=="ready"){
+        var message=`${Order.Customer.Name} ${Order.Customer.Surname} tu pedido #${Order.OrderID} esta listo para que puedas retirarlo`
+        redisClient.pub.publishAsync("msgToClient",message).then((msg)=>{
+          return redisClient.printPub("msgToClient",msg)
+        })
+      }
+      if(action=="created"){
+        var message=`${Order.Customer.Name} ${Order.Customer.Surname} tu pedido #${Order.OrderID} ya esta en nuestra cocina`
+        redisClient.pub.publishAsync("msgToClient",message).then((msg)=>{
+          return redisClient.printPub("msgToClient",msg)
+        })
+      }
+    }
+  })
+}
+
 function getOrders (req, res) {
   var limit = ((req.params.limit < config.maxLimitValue) ? req.params.limit : config.maxLimitValue)
   Order.findAll({
@@ -100,7 +178,7 @@ function getOrders (req, res) {
 
 function createOrder (req, res) {
   var order = Order.create({
-    CustomerID: req.body.CustomerID ? req.body.CustomerID : 3
+    CustomerID: dev?(5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1))):req.body.CustomerID
   }).then(order=>{
     order.setMenus(req.body.MenuesID).then((menues)=>{
       Order.findById(order.OrderID,{
@@ -147,6 +225,7 @@ function createOrder (req, res) {
               order: orderCreated
             })
               logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
+              msgToClient("created",order.OrderID)
           })
         })
 
@@ -171,35 +250,6 @@ function updateOrder (req, res) {
           found: true,
           updated: true,
           Order: Order.dataValues
-        })
-      })
-      .catch((err) => {
-        console.log(err)
-        res.status(500).send({
-          found: true,
-          updated: false,
-          message: `Error interno al guardar el Order`
-        })
-      })
-    }
-  })
-}
-
-function ackOrder (req, res) {
-  OrderMenu.findAll({ where: { OrderID: req.body.Order, MenuID: req.body.MEnu } }).then(Order => {
-    if (Order[0] == null) {
-      res.status(404).send({
-        found: false,
-        message: `No se encontro una con ID ${req.body.Order}`
-      })
-    } else {
-      Order[0].update({
-        ackFromKitchenAt: ((req.body.deliberedAt) ? req.body.deliberedAt : Order.deliberedAt)
-      }).then(() => {
-        console.log("ack recibido")
-        res.status(200).send({
-          found: true,
-          updated: true
         })
       })
       .catch((err) => {
@@ -242,11 +292,11 @@ function deleteOrder (req, res) {
 }
 
 module.exports = {
+  checkCompleted,
   updateOrder,
   getOrder,
   getLastOrder,
   getOrders,
   deleteOrder,
-  createOrder,
-  ackOrder
+  createOrder
 }
