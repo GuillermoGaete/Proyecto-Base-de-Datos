@@ -19,10 +19,28 @@ const MeasureUnitList = [
     longnamePlural: 'litros'
   },
   {
+    unit: 'mililitro',
+    shortname: 'ml',
+    shortnamePlural: 'mlts',
+    longnamePlural: 'mililitros'
+  },
+  {
     unit: 'gramo',
     shortname: 'gr',
     shortnamePlural: 'grs',
     longnamePlural: 'gramos'
+  },
+  {
+    unit: 'paquete',
+    shortname: 'pqt',
+    shortnamePlural: 'pqts',
+    longnamePlural: 'paquetes'
+  },
+  {
+    unit: 'unidad',
+    shortname: 'ud',
+    shortnamePlural: 'uds',
+    longnamePlural: 'unidades'
   }
 ]
 

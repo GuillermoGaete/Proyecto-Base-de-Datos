@@ -2,9 +2,9 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     queryInterface.createTable(
-      'IngredientMenu',
+      'MenuIngredient',
       {
-        IngredientMenuID: {
+        MenuIngredientID: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
@@ -49,6 +49,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    queryInterface.dropTable('IngredientMenu')
+    queryInterface.dropTable('MenuIngredient')
   }
 }

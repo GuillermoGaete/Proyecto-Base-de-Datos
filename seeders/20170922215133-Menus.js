@@ -6,6 +6,10 @@ var faker = require('faker')
 faker.locale = "es"
 const config = require('../config/seeding/config.json')
 const CategoryMenu = require('../models/categoryMenu')
+const Ingredient = require('../models/ingredient')
+const Menu = require('../models/menu')
+const Sequelize = require('sequelize')
+const Op = Sequelize.Op
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -28,6 +32,7 @@ module.exports = {
         var category = MenuListItem.categoryID;
         var menus= MenuListItem.menus;
         for(var k in menus){
+
           var dateMenuCreated = faker.date.between(config.createSingleBaseDateInit,config.createSingleBaseDateEnd)
           MenuListComplete.push({
             CategoryID: category,
@@ -39,12 +44,11 @@ module.exports = {
             ElaborationTimeMin:menus[k].ElaborationTimeMin,
             deletedAt: null,
             createdAt: dateMenuCreated,
-            updatedAt: dateMenuCreated
+            updatedAt: dateMenuCreated,
           })
         }
       })
-      return queryInterface.bulkInsert('Menu',MenuListComplete, {})
-
+      return queryInterface.bulkInsert('Menu',MenuListComplete,{})
     })
     .catch(err=>{
       console.log('Error al ejecutar la busqueda:'+err)

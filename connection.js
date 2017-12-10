@@ -21,8 +21,7 @@ const Ingredient = require('./models/ingredient')
 const MenuIngredient = require('./models/menuIngredient')
 const Customer = require('./models/customer')
 
-Order.belongsToMany(Menu,
-  {
+Order.belongsToMany(Menu,{
     through:
     {
       model:OrderMenu,
@@ -30,8 +29,8 @@ Order.belongsToMany(Menu,
     },
     foreignKey: 'OrderID'
 })
-Menu.belongsToMany(Order,
-  {
+
+Menu.belongsToMany(Order,{
     through:
     {
       model:OrderMenu,
@@ -39,8 +38,24 @@ Menu.belongsToMany(Order,
     },
     foreignKey: 'MenuID'
 })
-Menu.belongsToMany(Ingredient, { as: 'Ingredients', through: MenuIngredient })
-Ingredient.belongsToMany(Menu, { as: 'inMenues', through: MenuIngredient })
+
+Menu.belongsToMany(Ingredient,{
+    through:
+    {
+      model:MenuIngredient,
+      unique:false
+    },
+    foreignKey: 'MenuID'
+})
+
+Ingredient.belongsToMany(Menu,{
+    through:
+    {
+      model:MenuIngredient,
+      unique:false
+    },
+    foreignKey: 'IngredientID'
+})
 
 Order.belongsTo(Customer, { foreignKey: 'CustomerID' })
 Customer.hasMany(Order, { foreignKey: 'CustomerID' })

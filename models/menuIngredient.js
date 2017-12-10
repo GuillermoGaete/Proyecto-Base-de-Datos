@@ -2,7 +2,12 @@
 const Sequelize = require('sequelize')
 const Conection = require('../connection')
 
-const MenuIngredient = Conection.define('IngredientMenu', {
+const MenuIngredient = Conection.define('MenuIngredient', {
+  MenuIngredientID: {
+    type: Sequelize.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   MenuID: {
     type: Sequelize.INTEGER,
     references: {

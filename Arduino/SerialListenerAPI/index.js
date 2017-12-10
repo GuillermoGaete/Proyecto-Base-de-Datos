@@ -5,22 +5,27 @@ const Delimiter = SerialPort.parsers.Delimiter
 const readline = require('readline')
 const logger = require('./logger')
 const redisClient = require('../../service/redisClient')
-
+var reading=0;
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 })
 const rp = require('request-promise')
 
-//TODO - refactor this code, logic to recursive reading from REDIS queque
+//TODO - refactor this code
 
 function processMessages(channel,message){
   if(channel=="toKitchen"){
     logger.log(logger.GREEN, 'SERVER', `Llegaron ${message} ordenes para preparar`)
-    recursiveInsert("menuesToKitchen")
+    if(reading==0){
+      reading=1
+      recursiveInsert("menuesToKitchen")
+    }else{
+      logger.log(logger.GREEN, 'SERVER', `Ya se estan procesando`)
+    }
   }
   if(channel=="getTimes"){
-    logger.log(logger.GREEN, 'SERVER', `Pedido de tiempos para queque ${message}`)
+    logger.log(logger.GREEN, 'SERVER', `Pedido de tiempo para queque ${message}`)
   }
 }
 
@@ -50,6 +55,7 @@ function readedFromQueque(list,readed){
       })
       continueReading(list,readed)
     }else{
+      reading=0;
       logger.log(logger.GREEN, 'SERVER', `Se procesaron todas las ordenes preparar`)
     }
 }

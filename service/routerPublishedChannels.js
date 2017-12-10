@@ -7,11 +7,9 @@ const redisClient = require('./redisClient')
 function init(){
   redisClient.sub.subscribe("ackFromKitchen")
   redisClient.sub.subscribe("readyFromKitchen")
-  redisClient.sub.subscribe("orderCompleted")
   redisClient.sub.subscribe("toStockManagerOut")
   redisClient.sub.subscribe("checkOrder")
   redisClient.sub.on("message", function (channel, message) {
-    redisClient.printSub(channel,message)
     processMessages(channel,message)
   })
   logger.log(logger.GREEN, 'SERVICE routerPublishedChannels', `Init service`)
@@ -42,9 +40,6 @@ function processMessages(channel,message){
       break;
       case "checkOrder":
           OrderController.checkCompleted(message)
-      break;
-      case "orderCompleted":
-          logger.log(logger.GREEN, 'SERVICE routerPublishedChannels', `New message - Channel: ${channel} - Order: ${message}`)
       break;
       default:
           logger.log(logger.RED, 'SERVICE routerPublishedChannels', `Unprocesed message - Message: ${message} - Channel: ${channel}`)

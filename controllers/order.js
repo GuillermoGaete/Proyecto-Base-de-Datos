@@ -1,18 +1,22 @@
 const Order = require('../models/order')
 const OrderMenu = require('../models/orderMenu')
 const Customer = require('../models/customer')
+const Ingredient = require('../models/ingredient')
 const Menu = require('../models/menu')
 const config = require('./config.json')
 const CustomerAttributes = ['CustomerID', 'Name', 'Surname', 'Email', 'MobilePhone', 'Gender']
 const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt','completedAt','updatedAt', 'requiredAt','cookTime']
 const MenuAttributes = ['MenuID', 'Name', 'Description', 'ElaborationTimeMin', 'ShorDescription', 'Price', 'DiscountPercentage']
+const IngredientAttributes = ['Name']
 const logger = require('../helpers/logger')
 const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const OrderMenuController = require('../controllers/orderMenu')
 const sequelize = require('sequelize')
+
 const dev=true;
 const faker = require('faker')
+
 function getLastOrder (req, res) {
   Order.findAll({
     limit:1,
@@ -103,7 +107,6 @@ function setCompleted(OrderID){
       }).then((orderSaved) => {
         redisClient.pub.publishAsync("orderCompleted",orderSaved.OrderID).then((msg)=>{
           msgToClient("ready",orderSaved.OrderID)
-          return redisClient.printPub("orderCompleted",msg)
         })
       })
     }
@@ -177,61 +180,92 @@ function getOrders (req, res) {
 }
 
 function createOrder (req, res) {
-  var order = Order.create({
-    CustomerID: dev?(5 + (faker.random.number(2) * 4) + (faker.random.number(2) * (1))):req.body.CustomerID
-  }).then(order=>{
-    order.setMenus(req.body.MenuesID).then((menues)=>{
-      Order.findById(order.OrderID,{
-        include: [
-          {
-            model: Customer,
-            attributes: CustomerAttributes
-          },
-          {
-            model: Menu,
-            attributes: MenuAttributes
-          }
-        ],
-        attributes: OrderAttributes
-      }).then(orderCreated=>{
-        var promiseInsertAll = []
-        var list='menuesToKitchen'
-        orderCreated.getMenus().then((menues)=>{
-          menues.forEach(function(menu){
-            var menuToRedis={
-              "menu": menu.MenuID,
-              "order": menu.OrderMenu.OrderMenuID,
-              "elaborationTime":menu.ElaborationTimeMin
+  var menuesToInsert=[]
+  Menu.findAll({
+    order:[['MenuID','DESC']]
+  }).then(menues=>{
+    if (menues[0] != null && dev) {
+      var toInsert = 1 + faker.random.number(8)
+      for(var i = 0;i<=toInsert;i++){
+        menuesToInsert.push(1 + faker.random.number(menues[0].MenuID-1))
+      }
+    } else {
+      menuesToInsert=req.body.MenuesID
+      }
+    var order = Order.create({
+      CustomerID: dev?(0 + (faker.random.number(999))):req.body.CustomerID
+    }).then(order=>{
+      order.setMenus(menuesToInsert).then((menues)=>{
+        Order.findById(order.OrderID,{
+          include: [
+            {
+              model: Customer,
+              attributes: CustomerAttributes
+            },
+            {
+              model: Menu,
+              attributes: MenuAttributes
             }
-            var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
-                return redisClient.printInsertion(list,insert,menuToRedis)
-            })
-            .catch((err) =>{
-              return redisClient.printErrorInsertion(list,err,menuToRedis)
-            })
-            promiseInsertAll.push(promisePublish)
-          })
-          Promise.all(promiseInsertAll).then((values) => {
+          ],
+          attributes: OrderAttributes
+        }).then(orderCreated=>{
+          var promiseInsertAll = []
+          var list='menuesToKitchen'
+          orderCreated.getMenus().then((menues)=>{
             menues.forEach(function(menu){
-              OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
-            })
-            redisClient.pub.publishAsync("toKitchen", menues.length).then((msg)=>{
-              return redisClient.printPub("toKitchen",menues.length)
-            })
 
-            res.status(200).send({
-              created: true,
-              saved: true,
-              order: orderCreated
+              Menu.findById(menu.MenuID,{
+                include: [
+                  {
+                    model: Ingredient,
+                    attributes: IngredientAttributes
+                  }
+                ],
+              }).then(menuFinded=>{
+                console.log(menuFinded)
+              })
+
+
+
+
+
+              var menuToRedis={
+                "menu": menu.MenuID,
+                "order": menu.OrderMenu.OrderMenuID,
+                "elaborationTime":menu.ElaborationTimeMin
+              }
+              var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
+                  return redisClient.printInsertion(list,insert,menuToRedis)
+              })
+              .catch((err) =>{
+                return redisClient.printErrorInsertion(list,err,menuToRedis)
+              })
+              promiseInsertAll.push(promisePublish)
             })
-              logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
-              msgToClient("created",order.OrderID)
+            Promise.all(promiseInsertAll).then((values) => {
+              menues.forEach(function(menu){
+                OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
+              })
+              redisClient.pub.publishAsync("toKitchen", menues.length).then((msg)=>{
+                return redisClient.printPub("toKitchen",menues.length)
+              })
+
+              res.status(200).send({
+                created: true,
+                saved: true,
+                order: orderCreated
+              })
+                logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
+                msgToClient("created",order.OrderID)
+            })
           })
-        })
 
+        })
       })
     })
+
   })
+
 }
 
 function updateOrder (req, res) {
