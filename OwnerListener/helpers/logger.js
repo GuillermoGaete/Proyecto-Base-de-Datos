@@ -32,7 +32,7 @@ function log (color, site, msg) {
     console.log(`${site.yellow.bold} ${msg.yellow}`)
   }
   if (color === WHITE) {
-    console.log(`${site.white.bold} ${msg.white}`)
+    console.log(`${site.white.bold} ${msg.whie}`)
   }
   if (color === GRAY) {
     console.log(`${site.gray.bold} ${msg.gray}`)

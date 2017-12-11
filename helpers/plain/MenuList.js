@@ -156,7 +156,7 @@ const MenusList = [
           amount: 80
         },{
           Name:'queso rallado',
-          amount: 40
+          amount: 1
         }]
       },
       {
@@ -174,7 +174,7 @@ const MenusList = [
           amount: 70
         },{
           Name:'queso rallado',
-          amount: 35
+          amount: 1
         }]
       }
     ]

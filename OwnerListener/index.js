@@ -13,14 +13,14 @@ const sub = Redis.createClient({
   db: 10
 })
 
-sub.subscribe("readyMsgToClient")
-sub.subscribe("createdMsgToClient")
-logger.log(logger.BLUE, 'LISTENER', `Capturando mensajes a clientes`)
+sub.subscribe("buyMsgToOwner")
+sub.subscribe("createdMsgToOwner")
+logger.log(logger.BLUE, 'LISTENER', `Capturando mensajes a Owner`)
 sub.on("message", function (channel, message) {
-  if(channel=="readyMsgToClient"){
-    logger.log(logger.BLUE, 'LISTENER', `READY - ${message}`)
+  if(channel=="createdMsgToOwner"){
+    logger.log(logger.GREEN, 'LISTENER', `${message}`)
   }
-  if(channel=="createdMsgToClient"){
-    logger.log(logger.GREEN, 'LISTENER', `CREATED - ${message}`)
+  if(channel=="buyMsgToOwner"){
+    logger.log(logger.RED, 'LISTENER', `${message}`)
   }
 })

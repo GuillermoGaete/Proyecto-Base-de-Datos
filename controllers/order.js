@@ -1,5 +1,6 @@
 const Order = require('../models/order')
 const OrderMenu = require('../models/orderMenu')
+const StockOutput = require('../models/stockOutput')
 const Customer = require('../models/customer')
 const Ingredient = require('../models/ingredient')
 const Menu = require('../models/menu')
@@ -12,6 +13,7 @@ const logger = require('../helpers/logger')
 const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const OrderMenuController = require('../controllers/orderMenu')
+const MenssengerController = require('../controllers/messenger')
 const sequelize = require('sequelize')
 
 const dev=true;
@@ -106,43 +108,9 @@ function setCompleted(OrderID){
         completedAt: sequelize.fn('NOW')
       }).then((orderSaved) => {
         redisClient.pub.publishAsync("orderCompleted",orderSaved.OrderID).then((msg)=>{
-          msgToClient("ready",orderSaved.OrderID)
+          MenssengerController.msgToClient("ready",orderSaved.OrderID)
         })
       })
-    }
-  })
-}
-
-function msgToClient(action,order){
-  Order.findById(order, {
-    include: [
-      {
-        model: Menu,
-        attributes: MenuAttributes,
-        unique:false
-      },
-      {
-        model: Customer,
-        attributes: CustomerAttributes
-      }
-    ],
-    attributes: OrderAttributes
-  }).then(Order => {
-    if (Order == null) {
-      logger.log(logger.RED, 'CONTROLLER order', `Order not found trying set completed - Order:${OrderID}`)
-    } else {
-      if(action=="ready"){
-        var message=`${Order.Customer.Name} ${Order.Customer.Surname} tu pedido #${Order.OrderID} esta listo para que puedas retirarlo`
-        redisClient.pub.publishAsync("msgToClient",message).then((msg)=>{
-          return redisClient.printPub("msgToClient",msg)
-        })
-      }
-      if(action=="created"){
-        var message=`${Order.Customer.Name} ${Order.Customer.Surname} tu pedido #${Order.OrderID} ya esta en nuestra cocina`
-        redisClient.pub.publishAsync("msgToClient",message).then((msg)=>{
-          return redisClient.printPub("msgToClient",msg)
-        })
-      }
     }
   })
 }
@@ -213,22 +181,6 @@ function createOrder (req, res) {
           var list='menuesToKitchen'
           orderCreated.getMenus().then((menues)=>{
             menues.forEach(function(menu){
-
-              Menu.findById(menu.MenuID,{
-                include: [
-                  {
-                    model: Ingredient,
-                    attributes: IngredientAttributes
-                  }
-                ],
-              }).then(menuFinded=>{
-                console.log(menuFinded)
-              })
-
-
-
-
-
               var menuToRedis={
                 "menu": menu.MenuID,
                 "order": menu.OrderMenu.OrderMenuID,
@@ -256,12 +208,17 @@ function createOrder (req, res) {
                 order: orderCreated
               })
                 logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
-                msgToClient("created",order.OrderID)
+                MenssengerController.msgToClient("created",order.OrderID)
+                MenssengerController.msgToOwner("created",order.OrderID)
             })
           })
 
+        }).catch(err=>{
+          console.log(err)
         })
       })
+    }).catch(err=>{
+      console.log(err)
     })
 
   })

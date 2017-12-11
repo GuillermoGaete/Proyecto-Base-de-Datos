@@ -18,6 +18,9 @@ const Order = require('./models/order')
 const Menu = require('./models/menu')
 const OrderMenu = require('./models/orderMenu')
 const Ingredient = require('./models/ingredient')
+const MeasureUnit = require('./models/measureUnit')
+const StockOutput = require('./models/stockOutput')
+const StockInput = require('./models/stockInput')
 const MenuIngredient = require('./models/menuIngredient')
 const Customer = require('./models/customer')
 
@@ -56,6 +59,15 @@ Ingredient.belongsToMany(Menu,{
     },
     foreignKey: 'IngredientID'
 })
+
+StockOutput.belongsTo(Ingredient, { foreignKey: 'IngredientID' })
+Ingredient.hasMany(StockOutput, { foreignKey: 'IngredientID' })
+
+StockInput.belongsTo(Ingredient, { foreignKey: 'IngredientID' })
+Ingredient.hasMany(StockInput, { foreignKey: 'IngredientID' })
+
+Ingredient.belongsTo(MeasureUnit, { foreignKey: 'MeasureUnitID' })
+MeasureUnit.hasMany(Ingredient, { foreignKey: 'MeasureUnitID' })
 
 Order.belongsTo(Customer, { foreignKey: 'CustomerID' })
 Customer.hasMany(Order, { foreignKey: 'CustomerID' })

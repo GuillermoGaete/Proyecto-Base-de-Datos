@@ -270,7 +270,7 @@ const IngredientsList = [
       },
       {
         name: 'queso rallado',
-        criticalStock: 10,
+        criticalStock: 40,
         unit: 'paquete'
       },
       {

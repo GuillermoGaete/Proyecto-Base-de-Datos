@@ -2,6 +2,7 @@ const sequelize = require('sequelize')
 const OrderMenuController = require('../controllers/orderMenu')
 const OrderController = require('../controllers/order')
 const MenuController = require('../controllers/menu')
+const StockController = require('../controllers/stock')
 const logger = require('../helpers/logger')
 const redisClient = require('./redisClient')
 function init(){
@@ -26,9 +27,7 @@ function processMessages(channel,message){
           OrderMenuController.readyOrder(jsonMessage.order)
           break;
       case "toStockManagerOut":
-          //TODO ejecutar un insert en la tabla de stock OUT
-          //TODO Disparar un servicio que mire, los niveles de stock
-          logger.log(logger.GREEN, 'SERVICE routerPublishedChannels', `New message - Channel: ${channel} - MenuID: ${message}`)
+          StockController.registerOutput(message)
       break;
       case "toStockManagerIn":
           //TODO  ejecutar un insert en la tabla de stock IN

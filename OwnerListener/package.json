@@ -1,7 +1,7 @@
 {
   "name": "listener",
   "version": "1.0.0",
-  "description": "",
+  "description": "Para ver los mensajes enviados a los clientes",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js"

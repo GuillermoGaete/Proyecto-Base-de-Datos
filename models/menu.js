@@ -52,12 +52,5 @@ const Menu = Conection.define('Menu', {
   }
 )
 
-Menu.belongsToMany(Order, {
-  through: 'OrderMenu'
-})
-
-Menu.belongsTo(CategoryMenu, {
-  foreignKey: 'CategoryID'
-})
 
 module.exports = Menu

@@ -13,15 +13,6 @@ module.exports = {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        OrderID: {
-          type: Sequelize.INTEGER,
-          references: {
-            model: 'Order',
-            key: 'OrderID'
-          },
-          onUpdate: 'cascade',
-          onDelete: 'cascade'
-        },
         StockInputID: {
           type: Sequelize.INTEGER,
           references: {
@@ -29,7 +20,8 @@ module.exports = {
             key: 'StockInputID'
           },
           onUpdate: 'cascade',
-          onDelete: 'cascade'
+          onDelete: 'cascade',
+          allowNull: true
         },
         IngredientID: {
           type: Sequelize.INTEGER,
