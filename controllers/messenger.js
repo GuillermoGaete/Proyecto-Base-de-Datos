@@ -9,16 +9,32 @@ const OrderAttributes = ['OrderID', 'deliberedAt', 'createdAt','completedAt','up
 const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const sequelize = require('sequelize')
-const dev=true;
+const dev=false;
 const faker = require('faker')
-function msgToOwner(action,message){
+function msgToOwner(action,param){
   if(action=="needBuy"){
-    redisClient.pub.publishAsync("buyMsgToOwner",message).then((msg)=>{
-      return redisClient.printPub("buyMsgToOwner",msg)
+    redisClient.pub.publishAsync("buyMsgToOwner",param).then((msg)=>{
+      if(dev){
+        return redisClient.printPub("buyMsgToOwner",msg)
+      }
+    })
+  }
+  if(action=="infoStockChange"){
+    redisClient.pub.publishAsync("infoStockChange",param).then((msg)=>{
+      if(dev){
+        return redisClient.printPub("infoStockChange",msg)
+      }
+    })
+  }
+  if(action=="cantSold"){
+    redisClient.pub.publishAsync("cantSoldMsgToOwner",param).then((msg)=>{
+      if(dev){
+        return redisClient.printPub("cantSoldMsgToOwner",msg)
+      }
     })
   }
   if(action=="created"){
-    Order.findById(message, {
+    Order.findById(param, {
       include: [
         {
           model: Menu,
@@ -34,7 +50,9 @@ function msgToOwner(action,message){
     }).then(Order => {
       var message=`Nuevo pedido #${Order.OrderID} para ${Order.Customer.Name} ${Order.Customer.Surname}`
       redisClient.pub.publishAsync("createdMsgToOwner",message).then((msg)=>{
-        return redisClient.printPub("createdMsgToOwner",msg)
+        if(dev){
+          return redisClient.printPub("createdMsgToOwner",msg)
+        }
       })
     })
   }

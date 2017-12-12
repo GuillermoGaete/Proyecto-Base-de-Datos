@@ -27,7 +27,7 @@ function processMessages(channel,message){
           OrderMenuController.readyOrder(jsonMessage.order)
           break;
       case "toStockManagerOut":
-          StockController.registerOutput(message)
+          StockController.registerOutput(message,true)
       break;
       case "toStockManagerIn":
           //TODO  ejecutar un insert en la tabla de stock IN

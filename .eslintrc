@@ -106,3 +106,5 @@ globals:
   after: true
   beforeEach: true
   afterEach: true
+parserOptions:
+  ecmaVersion: 6

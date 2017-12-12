@@ -4,6 +4,7 @@ const express = require('express')
 const api = express.Router()
 const CustomerController = require('../controllers/customer')
 const OrderController = require('../controllers/order')
+const StockController = require('../controllers/stock')
 const OrderMenuController = require('../controllers/orderMenu')
 const MenuController = require('../controllers/menu')
 const IngredientController = require('../controllers/ingredient')
@@ -32,4 +33,6 @@ api.get('/ingredients(/:limit)?', IngredientController.getIngredients)
 api.put('/ingredient/:ingredientID', IngredientController.updateIngredient)
 api.delete('/ingredient/:ingredientID', IngredientController.deleteIngredient)
 
-module.exports = api
+api.post('/stock', StockController.registerInput)
+module
+.exports = api

@@ -14,7 +14,9 @@ const redisClient = require('../service/redisClient')
 const moment = require('moment')
 const OrderMenuController = require('../controllers/orderMenu')
 const MenssengerController = require('../controllers/messenger')
+const StockController = require('../controllers/stock')
 const sequelize = require('sequelize')
+const Conection = require('../connection')
 
 const dev=true;
 const faker = require('faker')
@@ -148,81 +150,139 @@ function getOrders (req, res) {
 }
 
 function createOrder (req, res) {
-  var menuesToInsert=[]
-  Menu.findAll({
-    order:[['MenuID','DESC']]
-  }).then(menues=>{
-    if (menues[0] != null && dev) {
-      var toInsert = 1 + faker.random.number(8)
-      for(var i = 0;i<=toInsert;i++){
-        menuesToInsert.push(1 + faker.random.number(menues[0].MenuID-1))
-      }
-    } else {
-      menuesToInsert=req.body.MenuesID
-      }
-    var order = Order.create({
-      CustomerID: dev?(0 + (faker.random.number(999))):req.body.CustomerID
-    }).then(order=>{
-      order.setMenus(menuesToInsert).then((menues)=>{
-        Order.findById(order.OrderID,{
-          include: [
-            {
-              model: Customer,
-              attributes: CustomerAttributes
-            },
-            {
-              model: Menu,
-              attributes: MenuAttributes
-            }
-          ],
-          attributes: OrderAttributes
-        }).then(orderCreated=>{
-          var promiseInsertAll = []
-          var list='menuesToKitchen'
-          orderCreated.getMenus().then((menues)=>{
-            menues.forEach(function(menu){
-              var menuToRedis={
-                "menu": menu.MenuID,
-                "order": menu.OrderMenu.OrderMenuID,
-                "elaborationTime":menu.ElaborationTimeMin
+  Conection.transaction({
+    isolationLevel:sequelize.Transaction.ISOLATION_LEVELS.READ_COMMITTED
+  }).then((t)=>{
+    var menuesToInsert=[]
+    Menu.findAll({
+      order:[['MenuID','DESC']],
+      transaction:t
+    }).then(menues=>{
+      if (menues[0] != null && dev) {
+        var toInsert = 1 + faker.random.number(8)
+        for(var i = 0;i<=toInsert;i++){
+          menuesToInsert.push(1 + faker.random.number(menues[0].MenuID-1))
+        }
+      } else {
+        menuesToInsert=req.body.MenuesID
+        }
+        console.log()
+      Order.create({
+        CustomerID: dev?(0 + (faker.random.number(999))):req.body.CustomerID
+      },{transaction: t}).then(order=>{
+        order.setMenus(menuesToInsert,{transaction:t}).then((menues)=>{
+          Order.findById(order.OrderID,{
+            include: [
+              {
+                model: Customer,
+                attributes: CustomerAttributes
+              },
+              {
+                model: Menu,
+                attributes: MenuAttributes
               }
-              var promisePublish = redisClient.Client.rpushAsync(list,JSON.stringify(menuToRedis)).then((insert)=>{
-                  return redisClient.printInsertion(list,insert,menuToRedis)
+            ],
+            attributes: OrderAttributes,
+            transaction:t
+          }).then(orderCreated=>{
+            var promisesCheckStockAll = []
+            var list='menuesToKitchen'
+            orderCreated.getMenus({transaction:t}).then((menues)=>{
+              var promiseCheckStock=StockController.checkMenuesStock(menues).then((available) => {
+                if(available==1){
+                  t.commit().then(()=>{
+                    menues.forEach(function(menu){
+                      var menueToKitchen={
+                        "menu":menu.MenuID,
+                        "order":menu.OrderMenu.OrderMenuID,
+                        "elaborationTime":menu.ElaborationTimeMin
+                      }
+                      redisClient.Client.rpushAsync("menuesToKitchen",JSON.stringify(menueToKitchen)).then(msg=>{
+                        OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
+                      })
+                      .catch((err) =>{
+                        console.log(err)
+                        res.status(500).send({
+                          created: false,
+                          saved: false,
+                          err: reasons
+                        })
+                      })
+                    })
+                    redisClient.pub.publishAsync("toKitchen", menues.length).then((msg)=>{
+                      return redisClient.printPub("toKitchen",menues.length)
+                    })
+                    logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${orderCreated.OrderID}`)
+                    MenssengerController.msgToClient("created",orderCreated.OrderID)
+                    MenssengerController.msgToOwner("created",orderCreated.OrderID)
+                    res.status(200).send({
+                      created: true,
+                      saved: true,
+                      order: orderCreated
+                  })
+                })
+                }else{
+                  t.rollback()
+                  MenssengerController.msgToClient("failed",`Hay un menu que no podemos venderte`)
+                  logger.log(logger.RED, 'CONTROLLER order', `Order created fail!`)
+                  res.status(400).send({
+                    created: false,
+                    saved: false,
+                    err: "No hay stock para preparar algun plato"
+                })
+                }
+                }).catch((reasons)=>{
+                t.rollback()
+                res.status(500).send({
+                  created: false,
+                  saved: false,
+                  err: reasons
+                })
               })
-              .catch((err) =>{
-                return redisClient.printErrorInsertion(list,err,menuToRedis)
-              })
-              promiseInsertAll.push(promisePublish)
-            })
-            Promise.all(promiseInsertAll).then((values) => {
-              menues.forEach(function(menu){
-                OrderMenuController.sentToKitchenOrder(menu.OrderMenu.OrderMenuID)
-              })
-              redisClient.pub.publishAsync("toKitchen", menues.length).then((msg)=>{
-                return redisClient.printPub("toKitchen",menues.length)
-              })
-
+            }).catch((err)=>{
+              console.log(err)
+              t.rollback();
               res.status(200).send({
-                created: true,
-                saved: true,
-                order: orderCreated
+                created: false,
+                saved: false,
+                err: err
               })
-                logger.log(logger.YELLOW, 'CONTROLLER order', `Order created! - Order:${order.OrderID}`)
-                MenssengerController.msgToClient("created",order.OrderID)
-                MenssengerController.msgToOwner("created",order.OrderID)
+            })
+
+          }).catch(err=>{
+            t.rollback();
+            console.log(err)
+            res.status(500).send({
+              created: false,
+              saved: false,
+              err: err
             })
           })
-
         }).catch(err=>{
-          console.log(err)
+          res.status(500).send({
+            created: false,
+            saved: false,
+            err: "Code 30"
+          })
+        })
+      }).catch(err=>{
+        t.rollback();
+        res.status(500).send({
+          created: false,
+          saved: false,
+          err: err
         })
       })
-    }).catch(err=>{
-      console.log(err)
+
     })
-
+  }).catch(err=>{
+    err.rollback()
+    res.status(500).send({
+      created: false,
+      saved: false,
+      err: err
+    })
   })
-
 }
 
 function updateOrder (req, res) {
